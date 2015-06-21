@@ -7,7 +7,7 @@
 | _| `._____|/__/     \__\ /__/     \__\     |__|     
                                                      
                                  
-(R)aise (A)ctionable (A)nalytics (T)oolkit
+(R)ahul's (A)ctionable (A)nalytics (T)oolkit
 
        __             ___
       // )    ___--""    "-.
