@@ -2,27 +2,14 @@
 from __future__ import print_function, division
 from numpy import array, asarray, mean, median, percentile, size, sum, sqrt
 from pdb import set_trace
+import sys
 from os import remove as rm
 from random import randint
-from methods1 import createTbl
-from Prediction import rforest, rforest2
-from _imports.weights import weights as W
-from os import environ, getcwd
 from os import walk
-from os.path import expanduser
 from pdb import set_trace
-import sys
-
-# Update PYTHONPATH
-HOME = expanduser('~')
-axe = HOME + '/git/axe/axe/'  # AXE
-pystat = HOME + '/git/pystats/'  # PySTAT
-cwd = getcwd()  # Current Directory
-sys.path.extend([axe, pystat, cwd])
-
 from fModel import *
 import csv
-
+import pandas as pd
 
 def flatten(x):
   """
@@ -240,19 +227,10 @@ class strawman():
     self.prune = prune
     self.name = name
 
-  def nodes(self, rowObject):
-    clusters = set([r.cells[-1] for r in rowObject])
-    for id in clusters:
-      cluster = []
-      for row in rowObject:
-        if row.cells[-1] == id:
-          cluster.append(row)
-      yield node(cluster)
-
   def main(self, mode='defect', justDeltas=False):
     if mode == "defect":
-      train_DF = createTbl(self.train, isBin=False)
-      test_DF = createTbl(self.test, isBin=False)
+      train_DF = csv2DF(self.train)
+      test_DF = csv2DF(self.train)
       before = rforest(train=train_DF, test=test_DF)
       clstr = [c for c in self.nodes(train_DF._rows)]
       return patches(train=self.train,

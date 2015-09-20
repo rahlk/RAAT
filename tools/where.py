@@ -6,29 +6,17 @@ from os import walk
 from random import randint as randi, seed as rseed
 __author__ = 'rkrsn'
 
-def getDataFrame(dir='Data/Jureczko/ant/'):
-  files=[]
-  for (dirpath, _, filename) in walk(dir):
-    for f in filename:
-      df=pd.read_csv(dirpath+f)
-      headers = [h for h in df.columns if '?' not in h]
-      files.append(df[headers])
-
-  "For N files in a project, use 1 to N-1 as train."
-  train = pd.concat(files[:-1])
-  #
-  # "For N files in a project, N as test."
-  # test = files[-1]
-  return train.as_matrix()
-
-
-def where():
+def where(data):
   """
   Recursive FASTMAP clustering.
   """
   rseed(0)
-  dataset = getDataFrame()
-  N = np.shape(dataset)[0]
+  if isinstance(data, pd.core.frame.DataFrame):
+    data = data.as_matrix()
+  if not isinstance(data, np.ndarray):
+    raise AttributeError('Incorrect data format. Must be a pandas Data Frame, or a numpy nd-array.')
+
+  N = np.shape(data)[0]
   clusters = []
 
   def aDist(one, two):
@@ -57,11 +45,24 @@ def where():
       _ = recurse(sorted(dataset,key=lambda F:proj(F))[:int(R/2)])
       _ = recurse(sorted(dataset,key=lambda F:proj(F))[int(R/2):])
 
-  recurse(dataset)
+  recurse(data)
   return clusters
+
+def _test(dir='../Data/Jureczko/ant/'):
+  files=[]
+  for (dirpath, _, filename) in walk(dir):
+    for f in filename:
+      df=pd.read_csv(dirpath+f)
+      headers = [h for h in df.columns if '?' not in h]
+      files.append(df[headers])
+
+  "For N files in a project, use 1 to N-1 as train."
+  train = pd.concat(files[:-1])
+  clusters = where(train)
+  # ----- ::DEBUG:: -----
+  set_trace()
+
 
 
 if __name__=='__main__':
-  clusters = where()
-  # ----- ::DEBUG:: -----
-  set_trace()
+  _test()
