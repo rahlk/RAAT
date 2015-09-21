@@ -10,7 +10,7 @@ from misc import *
 from pdb import set_trace
 
 def SMOTE(data=None, atleast=50, atmost=100, k=5, resample=False):
-
+  "Synthetic Minority Oversampling Technique"
   def knn(a,b):
     return sorted(b, key=lambda F: euclidean(a[:-1], F[:-1]))
 
@@ -70,24 +70,26 @@ def _smote():
 
 def rforest(train, test, tunings=None, smoteit=True, duplicate=True):
   "RF "
-  train_DF = csv2DF(train, as_mtx=False, toBin=True)
-  test_DF = csv2DF(test, as_mtx=False, toBin=True)
+  if not isinstance(train, pd.core.frame.DataFrame):
+    train = csv2DF(train, as_mtx=False, toBin=True)
+
+  if not isinstance(test, pd.core.frame.DataFrame):
+    test_DF = csv2DF(test, as_mtx=False, toBin=True)
 
   if smoteit:
-    train_DF = SMOTE(train_DF, resample=True)
+    train = SMOTE(train, resample=True)
   if not tunings:
     clf = RandomForestClassifier(n_estimators=100, random_state=1)
   else:
     clf = RandomForestClassifier(n_estimators=int(tunings[0]),
                                  max_features=tunings[1] / 100,
                                  min_samples_leaf=int(tunings[2]),
-                                 min_samples_split=int(tunings[3])
-                                 )
-  features = train_DF.columns[:-1]
-  klass = train_DF[train_DF.columns[-1]]
-  clf.fit(train_DF[features], klass)
-  actual = test_DF[test_DF.columns[-1]].as_matrix()
-  preds = clf.predict(test_DF[test_DF.columns[:-1]])
+                                 min_samples_split=int(tunings[3]))
+  features = train.columns[:-1]
+  klass = train[train.columns[-1]]
+  clf.fit(train[features], klass)
+  actual = test[test.columns[-1]].as_matrix()
+  preds = clf.predict(test[test.columns[:-1]])
   return actual, preds
 
 def _RF():

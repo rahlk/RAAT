@@ -6,7 +6,7 @@ import sys
 def say(text):
   sys.stdout.write(str(text))
 
-def csv2DF(dir, as_mtx=True, toBin=False):
+def csv2DF(dir, as_mtx=False, toBin=False):
   files=[]
   for f in dir:
     df=read_csv(f)
@@ -19,16 +19,25 @@ def csv2DF(dir, as_mtx=True, toBin=False):
   if as_mtx: return data_DF.as_matrix()
   else: return data_DF
 
-def explore(dir):
+def explore(dir='../Data/Jureczko/', name=None):
   datasets = []
   for (dirpath, dirnames, filenames) in walk(dir):
     datasets.append(dirpath)
   training = []
   testing = []
-  for k in datasets[1:]:
-    train = [[dirPath, fname] for dirPath, _, fname in walk(k)]
-    test = [train[0][0] + '/' + train[0][1].pop(-1)]
-    training.append(
-        [train[0][0] + '/' + p for p in train[0][1] if not p == '.DS_Store'])
-    testing.append(test)
-  return training, testing
+  if name:
+    for k in datasets[1:]:
+      if name in k:
+        train = [[dirPath, fname] for dirPath, _, fname in walk(k)]
+        test = [train[0][0] + '/' + train[0][1].pop(-1)]
+        training = [train[0][0] + '/' + p for p in train[0][1] if not p == '.DS_Store']
+        testing = test
+        return training, testing
+  else:
+    for k in datasets[1:]:
+      train = [[dirPath, fname] for dirPath, _, fname in walk(k)]
+      test = [train[0][0] + '/' + train[0][1].pop(-1)]
+      training.append(
+          [train[0][0] + '/' + p for p in train[0][1] if not p == '.DS_Store'])
+      testing.append(test)
+    return training, testing

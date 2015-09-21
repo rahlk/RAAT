@@ -2,14 +2,12 @@
 from __future__ import print_function, division
 from numpy import array, asarray, mean, median, percentile, size, sum, sqrt
 from pdb import set_trace
-import sys
-from os import remove as rm
-from random import randint
-from os import walk
-from pdb import set_trace
-from fModel import *
-import csv
+from tools.misc import *
+from tools.rforest import *
+from tools.where import where
 import pandas as pd
+from sklearn.tree import DecisionTreeClassifier as CART
+from scipy.spatial.distance import euclidean as edist
 
 def flatten(x):
   """
@@ -34,13 +32,6 @@ class changes():
     if not old == new:
       self.log.update({name: (old, new)})
 
-
-def eDist(row1, row2):
-  """Euclidean Distance
-  """
-  return sum([(a * a - b * b) ** 0.5 for a, b in zip(row1[:-1], row2[:-1])])
-
-
 class node():
 
   """
@@ -51,7 +42,7 @@ class node():
   def __init__(self, rows):
     self.rows = []
     for r in rows:
-      self.rows.append(r.cells[:-1])
+      self.rows.append(r[:-1])
 
   def exemplar(self, what='centroid'):
     if what == 'centroid':
@@ -69,15 +60,15 @@ class contrast():
 
   def closest(self, testCase):
     return sorted([f for f in self.clusters],
-                  key=lambda F: eDist(F.exemplar(), testCase.cells[:-1]))[0]
+                  key=lambda F: edist(F.exemplar(), testCase[:-1]))[0]
 
   def envy(self, testCase, alpha=0.5):
     me = self.closest(testCase)
     others = [o for o in self.clusters if not me == o]
-    betters = [f for f in others if f.exemplar()[-1] <= me.exemplar()[-1]]
+    betters = [f for f in others if f.exemplar()[-1] <= alpha*me.exemplar()[-1]]
     try:
       return sorted([f for f in betters],
-                    key=lambda F: eDist(F.exemplar(), me.exemplar()))[0]
+                    key=lambda F: edist(F.exemplar(), me.exemplar()))[0]
     except:
       return me
 
@@ -89,12 +80,13 @@ class patches():
   def __init__(
           self, train, test, clusters, prune=False, B=0.25
           , verbose=False, config=False, models=False, pred=[], name=None):
+
     if config or models:
-      self.train = createTbl(train, isBin=False)
-      self.test = createTbl(test, isBin=False)
+      self.train = csv2DF(train)
+      self.test = csv2DF(test)
     else:
-      self.train = createTbl(train, isBin=True)
-      self.test = createTbl(test, isBin=True)
+      self.train = csv2DF(train, toBin=False)
+      self.test = csv2DF(test, toBin=False)
 
     self.name = name
     self.clusters = clusters
@@ -107,46 +99,30 @@ class patches():
     self.change = []
 
   def min_max(self):
-    allRows = array(
-        map(
-            lambda Rows: array(
-                Rows.cells[
-                    :-
-                    2]),
-            self.train._rows +
-            self.test._rows))
-    N = len(allRows[0])
-    base = lambda X: sorted(X)[-1] - sorted(X)[0]
-    return array([base([r[i] for r in allRows]) for i in xrange(N)])
+    allRows = pd.concat([self.train, self.test]).as_matrix()
+    return np.max(allRows, axis=0)[:-1]-np.min(allRows, axis=0)[:-1]
 
   def fWeight(self, criterion='Variance'):
-    lbs = W(use=criterion).weights(self.train)
-    try:
-      sortedLbs = sorted([l / max(0.0001, max(lbs[0]))
-                          for l in lbs[0]], reverse=True)
-    except:
-      set_trace()
-    indx = int(self.B * len(sortedLbs)) - 1 if self.Prune else -1
-    if self.name:
-      L = [l / max(0.0001, max(lbs[0])) if not i in avoid(name=self.name) + flatten(
-          alternates(self.name)) else 0 for i, l in enumerate(lbs[0])]
-      cutoff = sorted(L, reverse=True)[indx]
-      return array(
-          [0 if l < cutoff else l for i, l in enumerate(L)] if self.Prune else L)
+    "Sort "
+    clf = CART(criterion='entropy')
+    features = self.train.columns[:-1]
+    klass = self.train[self.train.columns[-1]]
+    clf.fit(self.train[features], klass)
+    lbs = clf.feature_importances_
+    if self.Prune:
+      cutoff = sorted(lbs, reverse=True)[int(len(lbs)*self.B)]
+      return np.array([cc if cc>=cutoff else 0 for cc in lbs])
     else:
-      L = [l / max(0.0001, max(lbs[0])) for i, l in enumerate(lbs[0])]
-      cutoff = sorted(L, reverse=True)[indx]
-      return array(
-          [0 if l < cutoff else l for i, l in enumerate(L)] if self.Prune else L)
+      return lbs
 
   def delta0(self, node1, node2):
     if not self.bin:
       return array([el1 - el2 for el1, el2 in zip(node1.exemplar()
-                                                  [:-1], node2.exemplar()[:-1])]) / self.min_max() * self.mask
+                                                  , node2.exemplar())]) / self.min_max() * self.mask
 
     else:
       return array([el1 == el2 for el1, el2 in zip(node1.exemplar()
-                                                   [:-1], node2.exemplar()[:-1])])
+                                                   , node2.exemplar())])
 
   def delta(self, t):
     C = contrast(self.clusters)
@@ -157,10 +133,10 @@ class patches():
   def patchIt(self, t):
     C = changes()
     if not self.bin:
-      for i, old, delt, m in zip(range(len(t.cells[:-2])), t.cells[:-2], self.delta(t), self.mask.tolist()):
-        C.save(self.train.headers[i].name[1:], old, new=old + delt)
+      for i, old, delt in zip(range(len(t[:-1])), t[:-1], self.delta(t)):
+        C.save(self.train.columns[i][1:], old, new=old + delt)
       self.change.append(C.log)
-      return (array(t.cells[:-2]) + self.delta(t)).tolist()
+      return (array(t[:-1]) + self.delta(t)).tolist()+[None]
     else:
       for i, old, delt, m in zip(range(len(t.cells[:-2])), t.cells[:-2], self.delta(t), self.mask.tolist()):
         C.save(
@@ -176,49 +152,17 @@ class patches():
 
   def newTable(self, justDeltas=False):
     if not self.bin:
-      oldRows = [r for r in self.test._rows if abs(r.cells[-2]) > 0]
+      oldRows = [r for r in self.test.as_matrix() if abs(r[-1]) > 0]
     else:
-      oldRows = self.test._rows
+      oldRows = self.test
     newRows = [self.patchIt(t) for t in oldRows]
-    if self.write:
-      self.deltasCSVWriter()
 
-    header = [h.name for h in self.test.headers[:-1]]
-    name = str(randint(0, 1e6))
-
-    with open('tmp0.csv', 'w') as csvfile:
-      writer = csv.writer(csvfile, delimiter=',')
-      writer.writerow(header)
-      for el in newRows:
-        writer.writerow(el + [0])
-
-    if justDeltas == False:
-      try:
-        new = createTbl(['tmp0.csv'])
-        rm('tmp0.csv')
-        return new
-      except:
-        set_trace()
+    after = pd.DataFrame(newRows, columns=self.test.columns)
+    before = pd.DataFrame(oldRows, columns=self.test.columns)
+    if not justDeltas:
+      return after
     else:
       return self.change
-
-  def deltasCSVWriter(self, name='ant'):
-    "Changes"
-    header = array([h.name[1:] for h in self.test.headers[:-2]])
-    oldRows = [r for r, p in zip(self.test._rows, self.pred) if p > 0]
-    delta = array([self.delta(t) for t in oldRows])
-    y = median(delta, axis=0)
-    yhi, ylo = percentile(delta, q=[75, 25], axis=0)
-    dat1 = sorted(
-        [(h, a, b, c) for h, a, b, c in zip(header, y, ylo, yhi)], key=lambda F: F[1])
-    dat = asarray([(d[0], n, d[1], d[2], d[3])
-                   for d, n in zip(dat1, range(1, 21))])
-    with open('/Users/rkrsn/git/GNU-Plots/rkrsn/errorbar/%s.csv' % (name), 'w') as csvfile:
-      writer = csv.writer(csvfile, delimiter=' ')
-      for el in dat[()]:
-        writer.writerow(el)
-    # new = [self.newRow(t) for t in oldRows]
-
 
 class strawman():
 
@@ -232,12 +176,13 @@ class strawman():
       train_DF = csv2DF(self.train)
       test_DF = csv2DF(self.train)
       before = rforest(train=train_DF, test=test_DF)
-      clstr = [c for c in self.nodes(train_DF._rows)]
+      clstr = [node(c) for c in where(data=train_DF)]
       return patches(train=self.train,
                      test=self.test,
                      clusters=clstr,
                      prune=self.prune,
                      pred=before).newTable(justDeltas=justDeltas)
+
     elif mode == "models":
       train_DF = createTbl(self.train, isBin=False)
       test_DF = createTbl(self.test, isBin=False)
@@ -288,5 +233,11 @@ def categorize(dataName):
 
 if __name__ == '__main__':
   for name in ['ivy', 'jedit', 'lucene', 'poi', 'ant']:
-    train, test = categorize(name)
-    strawman(train[-1], test[-1]).main()
+    train, test = explore(dir='../Data/Jureczko/', name=name)
+    aft = strawman(train, test, prune=False).main()
+    _, pred = rforest(train,aft)
+    testDF = csv2DF(test, toBin=True)
+    before = testDF[testDF.columns[-1]]
+    print(name,': ', (1-sum(pred)/sum(before))*100)
+  set_trace()
+
