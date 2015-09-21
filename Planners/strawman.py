@@ -65,7 +65,7 @@ class contrast():
   def envy(self, testCase, alpha=0.5):
     me = self.closest(testCase)
     others = [o for o in self.clusters if not me == o]
-    betters = [f for f in others if f.exemplar()[-1] <= alpha*me.exemplar()[-1]]
+    betters = [f for f in others if f.exemplar()[-1] < alpha*me.exemplar()[-1]]
     try:
       return sorted([f for f in betters],
                     key=lambda F: edist(F.exemplar(), me.exemplar()))[0]
@@ -81,13 +81,8 @@ class patches():
           self, train, test, clusters, prune=False, B=0.25
           , verbose=False, config=False, models=False, pred=[], name=None):
 
-    if config or models:
-      self.train = csv2DF(train)
-      self.test = csv2DF(test)
-    else:
-      self.train = csv2DF(train, toBin=False)
-      self.test = csv2DF(test, toBin=False)
-
+    self.train = csv2DF(train)
+    self.test = csv2DF(test)
     self.name = name
     self.clusters = clusters
     self.Prune = prune
@@ -127,7 +122,7 @@ class patches():
   def delta(self, t):
     C = contrast(self.clusters)
     closest = C.closest(t)
-    better = C.envy(t, alpha=0.5)
+    better = C.envy(t, alpha=1)
     return self.delta0(closest, better)
 
   def patchIt(self, t):
@@ -238,6 +233,6 @@ if __name__ == '__main__':
     _, pred = rforest(train,aft)
     testDF = csv2DF(test, toBin=True)
     before = testDF[testDF.columns[-1]]
-    print(name,': ', (1-sum(pred)/sum(before))*100)
+    print(name,':', (1-sum(pred)/sum(before))*100)
   set_trace()
 
