@@ -18,9 +18,10 @@ def where(data):
 
   N = np.shape(data)[0]
   clusters = []
+  norm = np.max(data, axis=0)[:-1] -np.min(data, axis=0)[:-1]
 
   def aDist(one, two):
-    return np.sqrt(np.sum((np.array(one[:-1])-np.array(two[:-1]))**2))
+    return np.sqrt(np.sum((np.array(one[:-1])/norm-np.array(two[:-1])/norm)**2))
 
   def farthest(one,rest):
     return sorted(rest, key=lambda F: aDist(F,one))[-1]
@@ -61,8 +62,6 @@ def _test(dir='../Data/Jureczko/ant/'):
   clusters = where(train)
   # ----- ::DEBUG:: -----
   set_trace()
-
-
 
 if __name__=='__main__':
   _test()

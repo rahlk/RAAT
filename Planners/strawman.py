@@ -55,8 +55,9 @@ class contrast():
 
   "Identify the nearest enviable node."
 
-  def __init__(self, clusters):
+  def __init__(self, clusters, norm):
     self.clusters = clusters
+    self.norm = norm
 
   def closest(self, testCase):
     return sorted([f for f in self.clusters],
@@ -68,7 +69,7 @@ class contrast():
     betters = [f for f in others if f.exemplar()[-1] < alpha*me.exemplar()[-1]]
     try:
       return sorted([f for f in betters],
-                    key=lambda F: edist(F.exemplar(), me.exemplar()))[0]
+                    key=lambda F: edist(F.exemplar()/self.norm, me.exemplar()/self.norm))[0]
     except:
       return me
 
@@ -82,6 +83,7 @@ class patches():
           , verbose=False, config=False, models=False, pred=[], name=None):
 
     self.train = csv2DF(train)
+    self.trainBIN = csv2DF(train,toBin=True)
     self.test = csv2DF(test)
     self.name = name
     self.clusters = clusters
@@ -110,20 +112,19 @@ class patches():
     else:
       return lbs
 
-  def delta0(self, node1, node2):
-    if not self.bin:
-      return array([el1 - el2 for el1, el2 in zip(node1.exemplar()
-                                                  , node2.exemplar())]) / self.min_max() * self.mask
-
-    else:
-      return array([el1 == el2 for el1, el2 in zip(node1.exemplar()
-                                                   , node2.exemplar())])
-
   def delta(self, t):
-    C = contrast(self.clusters)
+
+    C = contrast(self.clusters, norm=self.min_max())
     closest = C.closest(t)
     better = C.envy(t, alpha=1)
-    return self.delta0(closest, better)
+    def delta0(node1, node2):
+      if not self.bin:
+        return array([el1 - el2 for el1
+        , el2 in zip(node1.exemplar(), node2.exemplar())])*self.mask
+      else:
+        return array([el1 == el2 for el1
+        , el2 in zip(node1.exemplar(), node2.exemplar())])
+    return delta0(closest, better)
 
   def patchIt(self, t):
     C = changes()
@@ -131,7 +132,9 @@ class patches():
       for i, old, delt in zip(range(len(t[:-1])), t[:-1], self.delta(t)):
         C.save(self.train.columns[i][1:], old, new=old + delt)
       self.change.append(C.log)
-      return (array(t[:-1]) + self.delta(t)).tolist()+[None]
+      indep = pd.DataFrame((array(t[:-1]) + self.delta(t)).tolist()+[t[-1]])
+      _, depen = rforest(self.trainBIN, indep.transpose())
+      return indep.transpose().as_matrix()[0].tolist()[:-1]+[depen[0]]
     else:
       for i, old, delt, m in zip(range(len(t.cells[:-2])), t.cells[:-2], self.delta(t), self.mask.tolist()):
         C.save(
@@ -147,13 +150,10 @@ class patches():
 
   def newTable(self, justDeltas=False):
     if not self.bin:
-      oldRows = [r for r in self.test.as_matrix() if abs(r[-1]) > 0]
+      newRows = [self.patchIt(t) for t in self.test.as_matrix() if t[-1]>0]
     else:
-      oldRows = self.test
-    newRows = [self.patchIt(t) for t in oldRows]
-
+      newRows = [self.patchIt(t) if t[-1]>0 else t.tolist() for t in self.test.as_matrix()]
     after = pd.DataFrame(newRows, columns=self.test.columns)
-    before = pd.DataFrame(oldRows, columns=self.test.columns)
     if not justDeltas:
       return after
     else:
@@ -178,61 +178,15 @@ class strawman():
                      prune=self.prune,
                      pred=before).newTable(justDeltas=justDeltas)
 
-    elif mode == "models":
-      train_DF = createTbl(self.train, isBin=False)
-      test_DF = createTbl(self.test, isBin=False)
-      before = rforest(train=train_DF, test=test_DF)
-      clstr = [c for c in self.nodes(train_DF._rows)]
-      return patches(train=self.train,
-                     test=self.test,
-                     clusters=clstr,
-                     prune=self.prune,
-                     models=True,
-                     pred=before).newTable(justDeltas=justDeltas)
-    elif mode == "config":
-      train_DF = createTbl(self.train, isBin=False)
-      test_DF = createTbl(self.test, isBin=False)
-      before = rforest2(train=train_DF, test=test_DF)
-      clstr = [c for c in self.nodes(train_DF._rows)]
-      return patches(train=self.train,
-                     test=self.test,
-                     clusters=clstr,
-                     name=self.name,
-                     prune=self.prune,
-                     pred=before,
-                     config=True).newTable(justDeltas=justDeltas)
-
-
-def categorize(dataName):
-  dir = '../Data/Jureczko'
-  projects = [Name for _, Name, __ in walk(dir)][0]
-  numData = len(projects)  # Number of data
-  one, two = explore(dir)
-  data = [one[i] + two[i] for i in xrange(len(one))]
-
-  def withinClass(data):
-    N = len(data)
-    return [(data[:n], [data[n]]) for n in range(1, N)]
-
-  def whereis():
-    for indx, name in enumerate(projects):
-      if name == dataName:
-        return indx
-
-  try:
-    return [
-        dat[0] for dat in withinClass(data[whereis()])], [
-        dat[1] for dat in withinClass(data[whereis()])]  # Train, Test
-  except:
-    set_trace()
-
 if __name__ == '__main__':
   for name in ['ivy', 'jedit', 'lucene', 'poi', 'ant']:
     train, test = explore(dir='../Data/Jureczko/', name=name)
-    aft = strawman(train, test, prune=False).main()
-    _, pred = rforest(train,aft)
+    aft = strawman(train, test, prune=True).main()
+    # _, pred = rforest(train,aft)
+    # _,  bef = rforest(train,csv2DF(test))
     testDF = csv2DF(test, toBin=True)
     before = testDF[testDF.columns[-1]]
-    print(name,':', (1-sum(pred)/sum(before))*100)
+    after = aft[aft.columns[-1]]
+    print(name,': 0.2f'%((1-sum(after)/sum(before))*100))
   set_trace()
 
