@@ -160,7 +160,6 @@ class patches():
       return self.change
 
 class strawman():
-
   def __init__(self, train, test, name=None, prune=False):
     self.train, self.test = train, test
     self.prune = prune
