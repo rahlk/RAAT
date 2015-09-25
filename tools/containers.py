@@ -83,7 +83,6 @@ class Num(Thing):
     for x in init: x=i.norm(i,x)
   def zero(i):
     i.lo,i.hi = 10**32,-10**32
-    i.some = Sample([],i.opts)
     i.n = i.mu = i.m2 = 0
   def __lt__(i,j):
     return i.mu < j.mu
@@ -98,7 +97,6 @@ class Num(Thing):
   def breaks(i): return i.some.breaks()
   def all(i)   : return i.some.all()
   def __add__(i,x):
-    if i.some: i.some + x
     if x > i.hi: i.hi = x
     if x < i.lo: i.lo = x
     i.n  += 1
