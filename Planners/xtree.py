@@ -5,17 +5,24 @@ from pdb import set_trace
 import pandas as pd
 from collections import Counter
 import numpy as np
+from tools.misc import *
 from sklearn.tree import DecisionTreeClassifier as CART
 
-def fselect(tbl, B=0.33):
-  "Sort "
-  clf = CART(criterion='entropy')
-  features = tbl.columns[3:-1]
-  klass = tbl[tbl.columns[-1]]
-  clf.fit(tbl[features], klass)
-  lbs = clf.feature_importances_
-  cutoff = sorted(lbs, reverse=True)[int(len(lbs)*B)]
-  return [features[i] for i,cc in enumerate(lbs) if cc>=cutoff]
+def settings(**d):
+  return Thing(
+      min=1,
+      infoPrune=0.33,
+      variancePrune=True,
+      debug=False,
+      m=5,
+      n=5,
+      klass=-1,
+      missing='?',
+      better=lambda x: x.better,
+      worse=lambda x: x.worse,
+      cells=lambda x: x.cells,
+      prune=False).override(d)
+
 
 def prune(n):
   if nmodes(n) == 1:
@@ -30,11 +37,15 @@ def classStats(n):
 
 
 def showTdiv(n, lvl=-1):
+  set_trace()
+  import sys
+  def say(x):
+    sys.stdout.write(x)
   if n.f:
     say(('|..' * lvl) + str(n.f.name) + "=" + str(n.val) +
-        "\t:" + str(n.mode) + " #" + str(nmodes(n)))
+        "\t:" + str(n.mode))
   if n.kids:
-    nl()
+    print('')
     for k in n.kids:
       showTdiv(k, lvl + 1)
   else:
@@ -85,19 +96,23 @@ def apex(test, tree):
             for leaf in apex1(opt.cells(test), tree)]
   return second(last(sorted(leaves)))
 
-def rankedFeatures(rows, t, features=None, klass=-1):
+def infogain(t, opt=settings()):
+  lst = rankedFeatures(t[t.columns].values.tolist(), t, features=t.columns[:opt.klass])
+  n = int(len(lst)*opt.infoPrune)
+  n = max(n, 1)
+  # set_trace()
+  return [f for e, f, syms, at in lst[:n]]
 
-  # features = tbl.columns
-  # klass = tbl.columns[-1]
-
-  def ranked(f):
+def rankedFeatures(rows, tbl, features=None, klass=-1):
+  def ranked(i,f):
     syms, at, n = {}, {}, len(rows)
-    for x in f.counts.keys():
+    def keys(i):
+      return Counter(np.array(rows).transpose()[i]).keys()
+    for x in keys(i):
       syms[x] = Sym()
     for row in rows:
       key = row[i]
       val = row[klass]
-      set_trace()
       syms[key] + val
       at[key] = at.get(key, []) + [row]
     e = 0
@@ -105,51 +120,57 @@ def rankedFeatures(rows, t, features=None, klass=-1):
       if val.n:
         e += val.n / n * val.ent()
     return e, f, syms, at
-  return sorted(ranked(f) for f in enumerate(features))
+  return sorted(ranked(i,f) for i,f in enumerate(features))
 
-def builder(tbl, rows=None, lvl=-1, asIs=10 ** 32, up=None, features=None, klass = -1, branch=[],
-          f=None, val=None, opt=None):
+def builder(dtbl, rows=None, lvl=-1, asIs=10 ** 32, up=None, features=None, klass = -1, branch=[],
+          f=None, val=None, opt=settings()):
 
-  if rows==None:
-    rows=discretize(tbl)
-  here = Thing(t=tbl, kids=[], f=f, val=val, up=up, lvl=lvl, rows=rows, modes={},
+  if not isinstance(rows, list): rows = dtbl[dtbl.columns].values.tolist()
+  here = Thing(t=dtbl, kids=[], f=f, val=val, up=up, lvl=lvl, rows=rows, modes={},
                branch=branch)
-  set_trace()
   def mode(lst):
     return np.max([Counter(lst)[k] for k in Counter(lst).keys()])
-  here.mode = mode(tbl[tbl.columns[klass]])
+
+  here.mode = mode(dtbl[dtbl.columns[klass]])
   if lvl > 10:
     return here
   if asIs == 0:
     return here
-  _, splitter, syms, splits = rankedFeatures(rows, tbl, features)[0]
+  _, splitter, syms, splits = rankedFeatures(rows, dtbl, features)[0]
   for key in sorted(splits.keys()):
     someRows = splits[key]
     toBe = syms[key].ent()
-    if opt.variancePrune and lvl > 1 and toBe >= asIs:
-      continue
     if opt.min <= len(someRows) < len(rows):
-      here.kids += [builder(tbl, someRows, lvl=lvl + 1, asIs=toBe, features=features,
+      here.kids += [builder(dtbl, someRows, lvl=lvl + 1, asIs=toBe, features=features,
                           up=here, f=splitter,
                           val=key, branch=branch + [(splitter, key)], opt=opt)]
   return here
 
 
 def dtree(tbl):
-  features = fselect(tbl)
-  tree = builder(tbl, features=features, branch=[])
-  if opt.prune:
+  features = infogain(discretize(tbl))
+  tree = builder(discretize(tbl), features=features, branch=[])
+  if settings().prune:
     modes(tree)
     prune(tree)
   return tree
 
-
-if __name__=='__main__':
+def old():
   import sys
   sys.path.append(['~/git/axe/axe'])
   import table as t
   import dtree as dt
   tbl_loc = '../Data/Jureczko/ant/ant-1.3.csv'
-  tbl = pd.read_csv(tbl_loc)
-  a = dtree(tbl)
+  tbl = t.discreteTable(tbl_loc)
+  dt = dt.tdiv(tbl)
   set_trace()
+
+def new():
+  tbl_loc = explore(name='ant')[0]
+  tbl = csv2DF(tbl_loc)
+  tree = dtree(tbl)
+  set_trace()
+
+if __name__=='__main__':
+  # old()
+  new()
