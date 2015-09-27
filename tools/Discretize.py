@@ -23,11 +23,14 @@ from sklearn.tree import DecisionTreeClassifier as CART
 def discretize(feature, klass, atleast=2):
 
   """
-  Recursive Minimal Entropy Discretization (RMED)
-  ```````````````````````````````````````````````
-  feature: A list or a numpy array of continuous attributes
-  klass: A list, or a numpy array of discrete class labels.
-  atleast: minimim splits.
+  Recursive Minimal Entropy Discretization
+  ````````````````````````````````````````
+  Inputs:
+    feature: A list or a numpy array of continuous attributes
+    klass: A list, or a numpy array of discrete class labels.
+    atleast: minimim splits.
+  Outputs:
+    splits: A list containing suggested spilt locations
   """
   def ent(x):
     C = Counter(x)
