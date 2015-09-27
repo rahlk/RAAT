@@ -1,176 +1,269 @@
-from __future__ import division, print_function
-from tools.containers import *
-from tools.Discretize import discretize
-from pdb import set_trace
-import pandas as pd
-from collections import Counter
-import numpy as np
-from tools.misc import *
-from sklearn.tree import DecisionTreeClassifier as CART
+#! /Users/rkrsn/anaconda/bin/python
+from __future__ import print_function
+from __future__ import division
 
-def settings(**d):
-  return Thing(
-      min=1,
-      infoPrune=0.33,
-      variancePrune=True,
-      debug=False,
-      m=5,
-      n=5,
-      klass=-1,
-      missing='?',
-      better=lambda x: x.better,
-      worse=lambda x: x.worse,
-      cells=lambda x: x.cells,
-      prune=False).override(d)
+import csv
+from os import remove as rm
+from random import randint
+
+from _imports.methods1 import *
+from dtree.dtree import *
 
 
-def prune(n):
-  if nmodes(n) == 1:
-    n.kids = []
-  for kid in n.kids:
-    prune(kid)
+def genTable(tbl, rows):
+  name = str(randint(0, 1000))
+  header = [h.name for h in tbl.headers[:-1]]
+  with open('tmp0.csv', 'w') as csvfile:
+    writer = csv.writer(csvfile, delimiter=',')
+    writer.writerow(header)
+    for el in rows:
+      writer.writerow(el[:-1])
+  new = createTbl(['tmp0.csv'])
+  rm('tmp0.csv')
+  return new
+
+class changes():
+
+  def __init__(self):
+    self.log = {}
+
+  def save(self, name=None, old=None, new=None):
+    if not old == new:
+      self.log.update({name: (old, new)})
+
+class deltas():
+
+  def __init__(self, row, myTree, majority=True):
+    self.row = row
+    self.loc = drop(row, myTree)
+    self.contrastSet = None
+    self.newRow = row
+    self.score = self.scorer(self.loc)
+    self.change = []
+
+  def scorer(self, node):
+    return np.mean([r.cells[-2] for r in node.rows])
+
+  def createNew(self, stuff, keys, N=1):
+    newElem = []
+    tmpRow = self.row
+    for _ in xrange(N):
+      C = changes()
+      for s in stuff:
+        lo, hi = s[1]
+        pos = keys[s[0].name]
+        old = tmpRow.cells[pos]
+        new = float(max(lo, min(hi, lo + rand() * abs(hi - lo))))
+        C.save(name=s[0].name, old=old, new=new)
+        tmpRow.cells[pos] = new
+      self.change.append(C.log)
+      newElem.append(tmpRow)
+    return newElem
+
+  def patches(self, keys, N_Patches=10):
+    # Search for the best possible contrast set and apply it
+    isles = []
+    newRow = self.row
+    for stuff in self.contrastSet:
+      isles.append(self.createNew(stuff, keys, N=N_Patches))
+    return isles, self.change
 
 
-def classStats(n):
-  depen = lambda x: x.cells[n.t.klass[0].col]
-  return Sym(depen(x) for x in n.rows)
+class store():
 
+  def __init__(self, node, majority=False):
+    self.node = node
+    self.dist = 0
+    self.DoC = 0
+    self.majority = majority
+    self.score = self.scorer(node)
 
-def showTdiv(n, lvl=-1):
-  set_trace()
-  import sys
-  def say(x):
-    sys.stdout.write(x)
-  if n.f:
-    say(('|..' * lvl) + str(n.f.name) + "=" + str(n.val) +
-        "\t:" + str(n.mode))
-  if n.kids:
-    print('')
-    for k in n.kids:
-      showTdiv(k, lvl + 1)
-  else:
-    s = classStats(n)
-    print(' ' + str(int(100 * s.counts[s.mode()] / len(n.rows))) + '% * ' + str(len(n.rows)))
+  def minority(self, node):
+    unique = list(set([r.cells[-1] for r in node.rows]))
+    counts = len(unique) * [0]
+#     set_trace()
+    for n in xrange(len(unique)):
+      for d in [r.cells[-1] for r in node.rows]:
+        if unique[n] == d:
+          counts[n] += 1
+    return unique, counts
 
-
-def dtnodes(tree, lvl=0):
-  if tree:
-    yield tree, lvl
-    for kid in tree.kids:
-      lvl1 = lvl
-      for sub, lvl1 in dtnodes(kid, lvl1 + 1):
-        yield sub, lvl1
-
-
-def dtleaves(tree):
-  for node, _ in dtnodes(tree):
-    # print "K>", tree.kids[0].__dict__.keys()
-    if not node.kids:
-      yield node
-
-
-def apex(test, tree):
-  """apex=  leaf at end of biggest (most supported)
-   branch that is selected by test in a tree"""
-  def equals(val, span):
-    if val == opt.missing or val == span:
-      return True
+  def scorer(self, node):
+    if self.majority:
+      unq, counts = self.minority(node)
+      id, maxel = 0, 0
+      for i, el in enumerate(counts):
+        if el > maxel:
+          maxel = el
+          id = i
+      return np.mean([r.cells[-2]
+                      for r in node.rows if r.cells[-1] == unq[id]])
     else:
-      if isinstance(span, tuple):
-        lo, hi = span
-        return lo <= val <= hi  # <hi
+      return np.mean([r.cells[-2] for r in node.rows])
+
+
+class xtrees():
+
+  "Treatments"
+
+  def __init__(self, train=None, test=None, test_DF=None,
+               verbose=True, smoteit=True, bin=False, majority=True):
+    self.train, self.test = train, test
+    try:
+      self.train_DF = createTbl(train, _smote=False, isBin=bin)
+    except:
+      set_trace()
+    if not test_DF:
+      self.test_DF = createTbl(test, isBin=bin)
+    else:
+      self.test_DF = test_DF
+    self.verbose, self.smoteit = verbose, smoteit
+    self.mod, self.keys = [], self.getKey()
+    self.majority = majority
+    t = discreteNums(
+        createTbl(
+            train, isBin=bin), map(
+            lambda x: x.cells, self.train_DF._rows))
+    self.myTree = tdiv(t)
+#     showTdiv(self.myTree)
+#     set_trace()
+
+  def flatten(self, x):
+    """
+    Takes an N times nested list of list like [[a,b],[c, [d, e]],[f]]
+    and returns a single list [a,b,c,d,e,f]
+    """
+    result = []
+    for el in x:
+      if hasattr(el, "__iter__") and not isinstance(el, basestring):
+        result.extend(self.flatten(el))
       else:
-        return span == val
+        result.append(el)
+    return result
 
-  def apex1(cells, tree):
-    found = False
-    for kid in tree.kids:
-      val = cells[kid.f.col]
-      if equals(val, kid.val):
-        for leaf in apex1(cells, kid):
-          found = True
-          yield leaf
-    if not found:
-      yield tree
-  leaves = [(len(leaf.rows), leaf)
-            for leaf in apex1(opt.cells(test), tree)]
-  return second(last(sorted(leaves)))
+  def leaves(self, node):
+    """
+    Returns all terminal nodes.
+    """
+    L = []
+    if len(node.kids) > 1:
+      for l in node.kids:
+        L.extend(self.leaves(l))
+      return L
+    elif len(node.kids) == 1:
+      return [node.kids]
+    else:
+      return [node]
 
-def infogain(t, opt=settings()):
-  lst = rankedFeatures(t[t.columns].values.tolist(), t, features=t.columns[:opt.klass])
-  n = int(len(lst)*opt.infoPrune)
-  n = max(n, 1)
-  # set_trace()
-  return [f for e, f, syms, at in lst[:n]]
+  def scorer(self, node):
+    """
+    Score an leaf node
+    """
+    return np.mean([r.cells[-2] for r in node.rows])
 
-def rankedFeatures(rows, tbl, features=None, klass=-1):
-  def ranked(i,f):
-    syms, at, n = {}, {}, len(rows)
-    def keys(i):
-      return Counter(np.array(rows).transpose()[i]).keys()
-    for x in keys(i):
-      syms[x] = Sym()
-    for row in rows:
-      key = row[i]
-      val = row[klass]
-      syms[key] + val
-      at[key] = at.get(key, []) + [row]
-    e = 0
-    for val in syms.values():
-      if val.n:
-        e += val.n / n * val.ent()
-    return e, f, syms, at
-  return sorted(ranked(i,f) for i,f in enumerate(features))
+  def isBetter(self, me, others):
+    """
+    Compare [me] with a bunch of [others,...], return the best person
+    """
+    for notme in others:
+      #       if '%.2f' % self.scorer(notme) == 0:
+      if self.scorer(notme) < self.scorer(me):
+        return True, notme.branch
+      else:
+        return False, []
 
-def builder(dtbl, rows=None, lvl=-1, asIs=10 ** 32, up=None, features=None, klass = -1, branch=[],
-          f=None, val=None, opt=settings()):
+  def attributes(self, nodes):
+    """
+    A method to handle unique branch variables that characterizes
+    a bunch of nodes.
+    """
+    xx = []
+    attr = []
 
-  if not isinstance(rows, list): rows = dtbl[dtbl.columns].values.tolist()
-  here = Thing(t=dtbl, kids=[], f=f, val=val, up=up, lvl=lvl, rows=rows, modes={},
-               branch=branch)
-  def mode(lst):
-    return np.max([Counter(lst)[k] for k in Counter(lst).keys()])
+    def seen(x):
+      xx.append(x)
+    for node in nodes:
+      if not node.node.branch in xx:
+        attr.append(node.node.branch)
+        seen(node.node.branch)
+    return attr
 
-  here.mode = mode(dtbl[dtbl.columns[klass]])
-  if lvl > 10:
-    return here
-  if asIs == 0:
-    return here
-  _, splitter, syms, splits = rankedFeatures(rows, dtbl, features)[0]
-  for key in sorted(splits.keys()):
-    someRows = splits[key]
-    toBe = syms[key].ent()
-    if opt.min <= len(someRows) < len(rows):
-      here.kids += [builder(dtbl, someRows, lvl=lvl + 1, asIs=toBe, features=features,
-                          up=here, f=splitter,
-                          val=key, branch=branch + [(splitter, key)], opt=opt)]
-  return here
+  def finder2(self, node, alpha=0.5, pos='far'):
+    """
+    finder2 is a more elegant version of finder that performs a search on
+    the entire tree to find leaves which are better than a certain 'node'
+    """
+
+    euclidDist = lambda a, b: ((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2) ** 0.5
+    midDist = lambda a, b: abs(sum(b) - sum(a)) / 2
+    vals = []
+    current = store(node, majority=self.majority)  # Store current sample
+    while node.lvl > -1:
+      node = node.up  # Move to tree root
+
+    # Get all the terminal nodes
+    leaves = self.flatten([self.leaves(_k) for _k in node.kids])
+
+    for leaf in leaves:
+      l = store(leaf, majority=self.majority)
+      for b in leaf.branch:
+        dist = []
+        if b[0] in [bb[0] for bb in current.node.branch]:
+          l.DoC += 1
+          dist.extend([midDist(b[1], bb[1])
+                       for bb in current.node.branch if b[0] == bb[0]])
+      l.dist = np.sqrt(np.sum(dist))
+      vals.append(l)
+    vals = sorted(vals, key=lambda F: F.DoC, reverse=False)
+    best = [v for v in vals if v.score < alpha * current.score]
+    if not len(best) > 0:
+      best = vals
+
+    # Get a list of DoCs (DoC -> (D)epth (o)f (C)orrespondence, btw..)
+    # set_trace()
+    attr = {}
+    bests = {}
+    unq = sorted(list(set([v.DoC for v in best])))  # A list of all DoCs..
+    for dd in unq:
+      bests.update(
+          {dd: sorted([v for v in best if v.DoC == dd], key=lambda F: F.score)})
+      attr.update({dd: self.attributes(
+          sorted([v for v in best if v.DoC == dd], key=lambda F: F.score))})
+
+    if pos == 'near':
+      return attr[unq[-1]][0]
+    elif pos == 'far':
+      return attr[unq[0]][-1]
+    elif pos == 'Best':
+      return self.attributes([sorted(best, key=lambda F: F.score)[0]])[0]
+
+  def getKey(self):
+    keys = {}
+    for i in xrange(len(self.test_DF.headers)):
+      keys.update({self.test_DF.headers[i].name[1:]: i})
+    return keys
+
+  def main(self, justDeltas=False, which='near'):
+    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    # Main
+    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    Change = []
+    testCase = self.test_DF._rows
+    for tC in testCase:
+      node = deltas(tC, self.myTree)  # A delta instance for the rows
+      node.contrastSet = [self.finder2(node.loc, pos=which)]
+      patch, change = node.patches(self.keys, N_Patches=1)
+      Change.extend(change)
+      self.mod.extend(patch[0])
+    if justDeltas:
+      return Change
+    else:
+      return genTable(self.test_DF, rows=[k.cells for k in self.mod])
 
 
-def dtree(tbl):
-  features = infogain(discretize(tbl))
-  tree = builder(discretize(tbl), features=features, branch=[])
-  if settings().prune:
-    modes(tree)
-    prune(tree)
-  return tree
-
-def old():
-  import sys
-  sys.path.append(['~/git/axe/axe'])
-  import table as t
-  import dtree as dt
-  tbl_loc = '../Data/Jureczko/ant/ant-1.3.csv'
-  tbl = t.discreteTable(tbl_loc)
-  dt = dt.tdiv(tbl)
+def _planningTest():
+  # <<<<<<<<<<< Debug >>>>>>>>>>>>>>>
   set_trace()
 
-def new():
-  tbl_loc = explore(name='ant')[0]
-  tbl = csv2DF(tbl_loc)
-  tree = dtree(tbl)
-  set_trace()
-
-if __name__=='__main__':
-  # old()
-  new()
+if __name__ == '__main__':
+  _planningTest()

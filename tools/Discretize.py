@@ -10,7 +10,6 @@ Igor Kononenko: On Biases in Estimating Multi-Valued Attributes. In: 14th Intern
 Dougherty, James, Ron Kohavi, and Mehran Sahami. "Supervised and unsupervised discretization of continuous features." Machine learning: proceedings of the twelfth international conference. Vol. 12. 1995.
 """
 from __future__ import division, print_function
-from containers import Thing
 import pandas as pd
 from collections import Counter
 from misc import *
@@ -20,6 +19,17 @@ from sklearn.tree import DecisionTreeClassifier as CART
 
 
 
+def fWeight(tbl):
+    """
+    Sort features based on entropy
+    """
+    clf = CART(criterion='entropy')
+    features = tbl.columns[:-1]
+    klass = tbl[tbl.columns[-1]]
+    clf.fit(tbl[features], klass)
+    lbs = clf.feature_importances_
+    return [tbl.columns[i] for i in np.argsort(lbs)[::-1]]
+
 def discretize(feature, klass, atleast=2):
 
   """
@@ -28,7 +38,7 @@ def discretize(feature, klass, atleast=2):
   Inputs:
     feature: A list or a numpy array of continuous attributes
     klass: A list, or a numpy array of discrete class labels.
-    atleast: minimim splits.
+    atleast: minimum splits.
   Outputs:
     splits: A list containing suggested spilt locations
   """
@@ -59,10 +69,10 @@ def discretize(feature, klass, atleast=2):
 
         def stop(k,k_l,k_r):
           gain =  E-T[T_min]
-          try: delta = np.log2(float(3**len(k)-2)) - (
-              len(k)*ent(k)-len(k_l)*ent(k_l)-len(k_r)*ent(k_r))
-          except OverflowError: delta = N*np.log2(3) - (
-              len(k)*ent(k)-len(k_l)*ent(k_l)-len(k_r)*ent(k_r))
+          def count(lst): return len(Counter(lst).keys())
+          delta = np.log2(float(3**count(k)-2)) - (
+              count(k)*ent(k)-count(k_l)*ent(k_l)-count(k_r)*ent(k_r))
+          # print(gain, (np.log2(N-1)+delta)/N)
           return gain<(np.log2(N-1)+delta)/N or T_min==0
 
         if stop(klass,k_l,k_r) and lvl>=atleast:
@@ -80,7 +90,13 @@ def _test0():
   "A Test Function"
   test  = np.random.normal(0,10,1000).tolist()
   klass = [int(abs(i)) for i in np.random.normal(0,1,1000)]
-  splits = discretize(feature=klass, klass=klass)
+  splits = discretize(feature=test, klass=klass)
+  set_trace()
+
+def _test1():
+  tbl_loc = explore(name='ant')[0]
+  tbl = csv2DF(tbl_loc)
+  new = discreteTbl(tbl)
   set_trace()
 
 def discreteTbl(tbl,B=0.33, Prune=True):
@@ -98,16 +114,6 @@ def discreteTbl(tbl,B=0.33, Prune=True):
   Returns:
   Pandas Data Frame: Discretized table
   """
-
-  def fWeight(tbl):
-    "Sort "
-    clf = CART(criterion='entropy')
-    features = tbl.columns[:-1]
-    klass = tbl[tbl.columns[-1]]
-    clf.fit(tbl[features], klass)
-    lbs = clf.feature_importances_
-    return lbs
-
   dtable=[]
   fweight = fWeight(tbl)
   for i,name in enumerate(tbl.columns[:-1]):
@@ -131,14 +137,12 @@ def discreteTbl(tbl,B=0.33, Prune=True):
   dtable.append(klass.tolist())
   dtable = pd.DataFrame(dtable).T
   dtable.columns = tbl.columns
-  ranks =[tbl.columns[i] for i in np.argsort(fweight)[::-1]]
+  ranks = fWeight(tbl)
   if Prune:
     return dtable[ranks[:int(len(ranks)*B)]+[tbl.columns[-1]]]
   else:
     return dtable[ranks+[tbl.columns[-1]]]
+
 if __name__=='__main__':
-  tbl_loc = explore(name='ant')[0]
-  tbl = csv2DF(tbl_loc)
-  new = discreteTbl(tbl)
-  set_trace()
+  _test0()
   pass

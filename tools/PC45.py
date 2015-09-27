@@ -34,9 +34,6 @@ def dtree(tbl, rows=None, lvl=-1, asIs=10 ** 32, up=None, klass = -1, branch=[],
   feature = tbl[name].values
   klass = tbl[tbl.columns[opt.klass]].values
   N = len(klass)
-  def mode(lst):
-    return np.max([Counter(lst)[k] for k in Counter(lst).keys()])
-  here.mode = mode(klass)
   here.score = np.mean(klass)
   splits = discretize(feature, klass)
   LO, HI = min(feature), max(feature)
@@ -94,7 +91,6 @@ def show(n, lvl=-1):
     print("")
 
 def _test():
-
   tbl_loc = explore(name='ant')[0]
   tbl = csv2DF(tbl_loc)
 
@@ -102,10 +98,10 @@ def _test():
   opt = Thing(
          min=1,
          maxLvL=10,
-         infoPrune=0.33,
+         infoPrune=0.5,
          klass=-1,
          prune=True,
-         debug=False,
+         debug=True,
          verbose=True)
 
   #Build a tree
