@@ -20,6 +20,15 @@ from pdb import set_trace
 
 def dtree(tbl, rows=None, lvl=-1, asIs=10 ** 32, up=None, klass = -1, branch=[],
           f=None, val=None, opt=None):
+  if not opt:
+      opt = Thing(
+         min=1,
+         maxLvL=10,
+         infoPrune=0.5,
+         klass=-1,
+         prune=True,
+         debug=True,
+         verbose=True)
 
   here = Thing(t=tbl, kids=[], f=f, val=val, up=up, lvl=lvl
               , rows=rows, modes={}, branch=branch)
@@ -90,6 +99,22 @@ def show(n, lvl=-1):
   else:
     print("")
 
+def nodes(tree, lvl=0):
+  if tree:
+    yield tree, lvl
+    for kid in tree.kids:
+      lvl1 = lvl
+      for sub, lvl1 in nodes(kid, lvl1 + 1):
+        yield sub, lvl1
+
+
+def leaves(tree):
+  for node, _ in nodes(tree):
+    # print "K>", tree.kids[0].__dict__.keys()
+    if not node.kids:
+      yield node
+
+@staticmethod
 def _test():
   tbl_loc = explore(name='ant')[0]
   tbl = csv2DF(tbl_loc)
