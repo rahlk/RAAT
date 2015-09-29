@@ -36,7 +36,9 @@ class patches:
 
   def __init__(i,train,test,tree=None):
     i.train=train
+    i.trainDF = csv2DF(train)
     i.test=test
+    i.testDF=csv2DF(test)
     i.tree=tree
     i.change =[]
 
@@ -92,7 +94,7 @@ def xtree(train, test, justDeltas=False):
   train_DF = csv2DF(train)
   test_DF = csv2DF(test)
   tree = pyC45.dtree(train_DF)
-  return patches(train=train_DF, test=test_DF, tree=tree).main(justDeltas=justDeltas)
+  return patches(train=train, test=test, tree=tree).main(justDeltas=justDeltas)
 
 if __name__ == '__main__':
   for name in ['ivy', 'jedit', 'lucene', 'poi', 'ant']:
