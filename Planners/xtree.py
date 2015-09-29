@@ -8,7 +8,7 @@ from tools.misc import *
 from tools import pyC45
 from tools.discretize import discretize
 from tools.rforest import *
-
+from random import uniform
 def flatten(x):
   """
   Takes an N times nested list of list like [[a,b],[c, [d, e]],[f]]
@@ -42,6 +42,7 @@ class patches:
 
   def patchIt(i,testInst):
     # 1. Find where t falls
+    # testInst = pd.DataFrame(testInst.transpose())
     def find(t):
       if len(t.kids)==0:
         return t
@@ -52,17 +53,27 @@ class patches:
           return find(kid)
       return t
 
+    def howfar(me, other):
+      common = [a for a in me.branch if a not in other.branch]
+      return len(me.branch)-len(common)
+
     current = find(i.tree)
     # 2. Traverse to  a better location
     # - 2.1 Go up one level
     upper = [kids for kids in current.up.kids if not kids==current]
     # - 2.2 Get all the leaf nodes of the neighbours
     leaf=[[l for l in pyC45.leaves(u)] for u in upper]
-    better = [l for l in flatten(leaf) if l.score<=0.5*current.score]
-    set_trace()
 
     # 3. Find and apply the changes
+    better = sorted([l for l in flatten(leaf) if l.score<=0.5*current.score], key=lambda F: howfar(F,current))[0]
+    for ii in better.branch:
+      before = testInst.loc[ii[0]]
+      testInst.loc[ii[0]] = uniform(ii[1][0], ii[1][1])
+      print(before, testInst.loc[ii[0]])
     # 4. Predict defects
+
+    predicted = rforest(i.train, pd.DataFrame(testInst).transpose())
+    set_trace()
     # 5. Return changes and prediction
 
 
