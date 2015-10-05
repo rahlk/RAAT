@@ -1,6 +1,6 @@
 typo: ready
+	@- git add --all .	
 	@- git status
-	@- git add --all .
 	@- git commit -am "commit with a makefile"
 	@- git push origin master # <== update as needed
 
