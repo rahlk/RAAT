@@ -98,9 +98,9 @@ class patches:
       return testInst.values.tolist()[0]
 
     def new(old, range):
-      # rad = abs(min(range[1]-old, old-range[1]))
-      # return randn(old, rad+1e-4)
-      return uniform(range[0],range[1])
+      rad = abs(min(range[1]-old, old-range[1]))
+      return randn(old, rad) if rad else old
+      # return uniform(old-rad,rad+old)
 
     for ii in best.branch:
       before = testInst[ii[0]]
@@ -127,6 +127,7 @@ class patches:
       return i.change
 
 def xtree(train, test, justDeltas=False):
+  "XTREE"
   train_DF = csv2DF(train)
   test_DF = csv2DF(test)
   tree = pyC45.dtree(train_DF)
