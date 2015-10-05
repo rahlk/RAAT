@@ -1,16 +1,24 @@
-typo:   
+typo: ready
 	@- git status
 	@- git add --all .
 	@- git commit -am "commit with a makefile"
 	@- git push origin master # <== update as needed
 
-commit: 
+commit: ready 
 	@- git status
 	@- git commit -a
 	@- git push origin master
 
-update: 
+update: ready
 	@- git pull origin master
 
-status: 
+status: ready
 	@- git status
+
+ready: ready
+	@git config --global credential.helper cache
+	@git config credential.helper 'cache --timeout=3600'
+
+rahlk:  # <== change to your name
+	@git config --global user.name "rahlk"
+	@git config --global user.email i.m.ralk@gmail.com
