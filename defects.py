@@ -21,7 +21,7 @@ if __name__=='__main__':
   E = []
   for name in ['ant', 'ivy', 'jedit', 'lucene', 'poi']:
     print("##", name)
-    train, test = explore(dir='../Data/Jureczko/', name=name)
+    train, test = explore(dir='Data/Jureczko/', name=name)
     aft = [name]
     for _ in xrange(40):
       aft.append(xtree(train, test))

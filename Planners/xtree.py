@@ -4,7 +4,8 @@ XTREE
 from __future__ import print_function, division
 import pandas as pd, numpy as np
 from pdb import set_trace
-
+import sys
+sys.path.append('..')
 from tools.sk import *
 from tools.misc import *
 from tools.rforest import *
@@ -99,8 +100,9 @@ class patches:
 
     def new(old, range):
       rad = abs(min(range[1]-old, old-range[1]))
-      return randn(old, rad) if rad else old
+      # return randn(old, rad) if rad else old
       # return uniform(old-rad,rad+old)
+      return uniform(range[0],range[1])
 
     for ii in best.branch:
       before = testInst[ii[0]]
@@ -119,8 +121,8 @@ class patches:
     newRows = [i.patchIt(i.testDF.iloc[n]) for n in xrange(i.testDF.shape[0]) if i.testDF.iloc[n][-1]>0]
     newRows = pd.DataFrame(newRows, columns=i.testDF.columns)
     before, after = rforest(i.train, newRows)
-    # set_trace()
     gain = (1-sum(after)/len(after))*100
+    # set_trace()
     if not justDeltas:
       return gain
     else:
@@ -128,18 +130,18 @@ class patches:
 
 def xtree(train, test, justDeltas=False):
   "XTREE"
-  train_DF = csv2DF(train)
+  train_DF = csv2DF(train, toBin=True)
   test_DF = csv2DF(test)
   tree = pyC45.dtree(train_DF)
   return patches(train=train, test=test, trainDF=train_DF, testDF=test_DF, tree=tree).main(justDeltas=justDeltas)
 
 if __name__ == '__main__':
   E = []
-  for name in ['ant', 'ivy', 'jedit', 'lucene', 'poi']:
+  for name in ['ant']:#, 'ivy', 'jedit', 'lucene', 'poi']:
     print("##", name)
     train, test = explore(dir='../Data/Jureczko/', name=name)
     aft = [name]
-    for _ in xrange(40):
+    for _ in xrange(10):
       aft.append(xtree(train, test))
     E.append(aft)
   rdivDemo(E)

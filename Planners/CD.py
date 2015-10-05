@@ -2,12 +2,26 @@
 XTREE
 """
 from __future__ import print_function, division
+import sys
+sys.path.append('..')
 from tools.sk import *
 from tools.rforest import *
 from tools.where import where
 from random import choice
 from scipy.spatial.distance import euclidean as edist
-from tools.Discretize import fWeight
+from sklearn.tree import DecisionTreeClassifier as CART
+
+def fWeight(tbl):
+    """
+    Sort features based on entropy
+    """
+    clf = CART(criterion='entropy')
+    features = tbl.columns[:-1]
+    klass = tbl[tbl.columns[-1]]
+    clf.fit(tbl[features], klass)
+    lbs = clf.feature_importances_
+    return np.argsort(lbs)[::-1]
+
 def flatten(x):
   """
   Takes an N times nested list of list like [[a,b],[c, [d, e]],[f]]
@@ -20,6 +34,8 @@ def flatten(x):
     else:
       result.append(el)
   return result
+
+
 
 class node:
   """
@@ -74,24 +90,22 @@ class patches:
     return sorted(i.clstr, key= lambda x: edist(arr[:-1], x.sample[:-1]))
 
   def patchIt(i,testInst):
+    testInst = testInst.values
     close = i.closest(testInst)[0]
     better = sorted(i.closest(close.sample), key=lambda x: x.sample[-1])[0]
-    newInst = testInst.values + (better.sample-close.sample)
-    asDF = pd.DataFrame(newInst).transpose()
-    asDF.columns=pd.DataFrame(testInst).transpose().columns.tolist()
+    newInst = testInst + (better.sample-close.sample)
     if i.fsel:
-      newInst = [asDF[n] if n in i.lbs[:int(0.33)*(len(i.lbs))] else testInst[n] for n in i.testDF.columns]
-      newInst = pd.DataFrame(newInst).transpose()
-      newInst.columns=i.lbs+[i.testDF.columns[-1]]
-      return newInst[i.testDF.columns].values[0]
-    pass
+      indx = i.lbs[:int(len(i.lbs)*0.33)]
+      for n in indx:
+        testInst[n] = newInst[n]
+    return testInst
 
   def main(i, reps=10, justDeltas=False):
     newRows = [i.patchIt(i.testDF.iloc[n]) for n in xrange(i.testDF.shape[0]) if i.testDF.iloc[n][-1]>0]
     newRows = pd.DataFrame(newRows, columns=i.testDF.columns)
     before, after = rforest(i.train, newRows)
-    set_trace()
     gain = (1-sum(after)/len(after))*100
+    # set_trace()
     # set_trace()
     if not justDeltas:
       return gain
@@ -100,7 +114,7 @@ class patches:
 
 def CD(train, test, justDeltas=False):
   "CD"
-  train_DF = csv2DF(train)
+  train_DF = csv2DF(train, toBin=True)
   test_DF = csv2DF(test)
   clstr = [node(x) for x in where(data=train_DF)]
   # set_trace()
@@ -108,11 +122,11 @@ def CD(train, test, justDeltas=False):
 
 if __name__ == '__main__':
   E = []
-  for name in ['ant', 'ivy', 'jedit', 'lucene', 'poi']:
+  for name in ['ant']:#, 'ivy', 'jedit', 'lucene', 'poi']:
     print("##", name)
     train, test = explore(dir='../Data/Jureczko/', name=name)
     aft = [name]
-    for _ in xrange(1):
+    for _ in xrange(10):
       aft.append(CD(train, test))
     E.append(aft)
   rdivDemo(E)
