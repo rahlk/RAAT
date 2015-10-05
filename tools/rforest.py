@@ -68,10 +68,10 @@ def _smote():
   # ---- ::DEBUG:: -----
   set_trace()
 
-def rforest(train, test, tunings=None, smoteit=True, duplicate=True):
+def rforest(train, test, tunings=None, smoteit=True, bin=True):
   "RF "
   if not isinstance(train, pd.core.frame.DataFrame):
-    train = csv2DF(train, as_mtx=False, toBin=True)
+    train = csv2DF(train, as_mtx=False, toBin=bin)
 
   if not isinstance(test, pd.core.frame.DataFrame):
     test_DF = csv2DF(test, as_mtx=False, toBin=True)
