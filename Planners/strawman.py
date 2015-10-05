@@ -186,6 +186,6 @@ if __name__ == '__main__':
     testDF = csv2DF(test, toBin=True)
     before = testDF[testDF.columns[-1]]
     after = aft[aft.columns[-1]]
-    print(name,': 0.2f'%((1-sum(after)/sum(before))*100))
+    print(name,':%0.2f'%((1-sum(after)/sum(before))*100))
   set_trace()
 

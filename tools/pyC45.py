@@ -10,7 +10,7 @@ Also uses,
 
 """
 from __future__ import division, print_function
-from discretize import discretize, fWeight
+from tools.Discretize import discretize, fWeight
 import pandas as pd
 import numpy as np
 from containers import Thing
@@ -90,8 +90,8 @@ def show(n, lvl=-1):
   def say(x):
     sys.stdout.write(x)
   if n.f:
-    say(('|..' * lvl) + str(n.f) + "=" + str(n.val) +
-        "\t:" + str(n.score))
+    say(('|..' * lvl) + str(n.f) + "=" +"(%0.2f, %0.2f)"%n.val +
+        "\t:" + "%0.2f"%(n.score))
   if n.kids:
     print('')
     for k in n.kids:

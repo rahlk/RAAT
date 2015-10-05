@@ -30,7 +30,7 @@ def fWeight(tbl):
     lbs = clf.feature_importances_
     return [tbl.columns[i] for i in np.argsort(lbs)[::-1]]
 
-def discretize(feature, klass, atleast=2):
+def discretize(feature, klass, atleast=-1):
 
   """
   Recursive Minimal Entropy Discretization
