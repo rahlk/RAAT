@@ -30,7 +30,7 @@ def fWeight(tbl):
     lbs = clf.feature_importances_
     return [tbl.columns[i] for i in np.argsort(lbs)[::-1]]
 
-def discretize(feature, klass, atleast=-1):
+def discretize(feature, klass, atleast=-1, discrete=False):
 
   """
   Recursive Minimal Entropy Discretization
@@ -42,10 +42,15 @@ def discretize(feature, klass, atleast=-1):
   Outputs:
     splits: A list containing suggested spilt locations
   """
-  def ent(x):
-    C = Counter(x)
-    N = len(x)
-    return sum([-C[n]/N*np.log(C[n]/N) for n in C.keys()])
+  def measure(x):
+    def ent(x):
+      C = Counter(x)
+      N = len(x)
+      return sum([-C[n]/N*np.log(C[n]/N) for n in C.keys()])
+    def stdev(x):
+      set_trace()
+    if not discrete: return ent(x)
+    else: return stdev(x)
 
   # Sort features and klass
   feature, klass = sorted(feature), [k for (f,k) in sorted(zip(feature,klass))]
@@ -54,14 +59,14 @@ def discretize(feature, klass, atleast=-1):
   lvl = 0
   def redo(feature, klass, lvl):
       if len(feature)>0:
-        E = ent(klass)
+        E = measure(klass)
         N = len(klass)
         T=[] # Record boundaries of splits
         for k in xrange(len(feature)):
           west, east = feature[:k], feature[k:]
           k_w, k_e = klass[:k], klass[k:]
           N_w, N_e = len(west), len(east)
-          T+=[N_w/N*ent(k_w)+N_e/N*ent(k_e)]
+          T+=[N_w/N*measure(k_w)+N_e/N*measure(k_e)]
 
         T_min = np.argmin(T)
         left, right = feature[:T_min], feature[T_min:]
@@ -71,7 +76,7 @@ def discretize(feature, klass, atleast=-1):
           gain =  E-T[T_min]
           def count(lst): return len(Counter(lst).keys())
           delta = np.log2(float(3**count(k)-2)) - (
-              count(k)*ent(k)-count(k_l)*ent(k_l)-count(k_r)*ent(k_r))
+              count(k)*measure(k)-count(k_l)*measure(k_l)-count(k_r)*measure(k_r))
           # print(gain, (np.log2(N-1)+delta)/N)
           return gain<(np.log2(N-1)+delta)/N or T_min==0
 

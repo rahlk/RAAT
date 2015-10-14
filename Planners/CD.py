@@ -91,16 +91,24 @@ class CD:
 
   def patchIt(i,testInst):
     testInst = testInst.values
+    C = changes()
     close = i.closest(testInst)[0]
     better = [b for b in i.clstr if b.sample[-1]<testInst[-1]]
-    better = sorted(i.closest(close.sample), key=lambda x: x.sample[-1])[0]
+    better = sorted(i.closest(close.sample), key=lambda x: x.sample[-1])[1]
     newInst = testInst + (better.sample-close.sample)
+    # set_trace()
     if i.fsel:
+      old = testInst
       indx = i.lbs[:int(len(i.lbs)*0.33)]
       for n in indx:
+        C.save(name=i.testDF.columns.values[n], old=testInst[n], new=newInst[n])
         testInst[n] = newInst[n]
+      i.change.append(C.log)
       return testInst
     else:
+      for name, then, now in zip(i.testDF.columns[:-1].values,
+          testInst, newInst): C.save(name=name, old=then, new=now)
+      i.change.append(C.log)
       return newInst
 
   def main(i, reps=10, justDeltas=False):
@@ -113,12 +121,12 @@ class CD:
     if not justDeltas:
       return gain
     else:
-      return i.change
+      return i.testDF.columns[:-1].values, i.change
 
 
 class HOW:
 
-  def __init__(i,train,test,trainDF,testDF,fsel=True,clst=None):
+  def __init__(i,train,test,trainDF,testDF,fsel=False,clst=None):
     i.train=train
     i.trainDF = trainDF
     i.test=test
@@ -143,6 +151,7 @@ class HOW:
 
   def patchIt(i,testInst):
     testInst = testInst.values
+    C = changes()
     def proj(one, two, test):
       a = edist(one, test)
       b = edist(two, test)
@@ -151,10 +160,14 @@ class HOW:
     better = sorted(i.pairs, key= lambda x: proj(x[0].sample, x[1].sample, testInst), reverse=True)[0]
     (toMe, notToMe) = (better[0], better[1]) if better[0].sample[-1]<=better[1].sample[-1] else (better[1], better[0])
     newInst = testInst + 0.5*(toMe.sample-testInst)
+    # set_trace()
     if i.fsel:
+      old=testInst
       indx = i.lbs[:int(len(i.lbs)*0.33)]
       for n in indx:
+        C.save(name=i.testDF.columns.values[n], old=testInst[n], new=newInst[n])
         testInst[n] = newInst[n]
+      i.change.append(C.log)
       return testInst
     else:
       return newInst
@@ -170,7 +183,7 @@ class HOW:
     if not justDeltas:
       return gain
     else:
-      return i.change
+      return i.testDF.columns[:-1].values, i.change
 
 def method1(train, test, justDeltas=False):
   "CD"

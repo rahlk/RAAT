@@ -1,10 +1,18 @@
 from pandas import DataFrame, read_csv, concat
 from os import walk
+import numpy as np
 from pdb import set_trace
 import sys
 
 def say(text):
   sys.stdout.write(str(text))
+
+def shuffle(df, n=1, axis=0):     
+    df = df.copy()
+    for _ in range(n):
+        df.apply(np.random.shuffle, axis=axis)
+    return df
+    
 
 def csv2DF(dir, as_mtx=False, toBin=False):
   files=[]
@@ -26,13 +34,17 @@ def explore(dir='../Data/Jureczko/', name=None):
   training = []
   testing = []
   if name:
-    for k in datasets[1:]:
-      if name in k:
-        train = [[dirPath, fname] for dirPath, _, fname in walk(k)]
-        test = [train[0][0] + '/' + train[0][1].pop(-1)]
-        training = [train[0][0] + '/' + p for p in train[0][1] if not p == '.DS_Store']
-        testing = test
-        return training, testing
+      for k in datasets[1:]:
+        if name in k:
+          if 'Jureczko' in dir:
+            train = [[dirPath, fname] for dirPath, _, fname in walk(k)]
+            test = [train[0][0] + '/' + train[0][1].pop(-1)]
+            training = [train[0][0] + '/' + p for p in train[0][1] if not p == '.DS_Store']
+            testing = test
+            return training, testing
+          else:
+            train = [dir+name+'/'+fname[0] for dirPath, _, fname in walk(k)]
+            return train
   else:
     for k in datasets[1:]:
       train = [[dirPath, fname] for dirPath, _, fname in walk(k)]

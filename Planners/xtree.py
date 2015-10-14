@@ -11,7 +11,6 @@ from tools.misc import *
 from tools.rforest import *
 import tools.pyC45 as pyC45
 from tools.Discretize import discretize
-
 from timeit import time
 from random import uniform
 from numpy.random import normal as randn
@@ -122,18 +121,24 @@ class patches:
     newRows = pd.DataFrame(newRows, columns=i.testDF.columns)
     before, after = rforest(i.train, newRows)
     gain = (1-sum(after)/len(after))*100
-    # set_trace()
     if not justDeltas:
       return gain
     else:
-      return i.change
+      return i.testDF.columns[:-1], i.change
 
-def xtree(train, test, justDeltas=False):
+def xtree(train, test, justDeltas=False, config=False):
   "XTREE"
-  train_DF = csv2DF(train, toBin=True)
-  test_DF = csv2DF(test)
-  tree = pyC45.dtree(train_DF)
-  return patches(train=train, test=test, trainDF=train_DF, testDF=test_DF, tree=tree).main(justDeltas=justDeltas)
+  if config:
+    data = csv2DF(train, toBin=False)
+    shuffle(data)
+    train_DF, test_DF=data[:int(len(data)/2)], data[int(len(data)/2):].reset_index(drop=True)
+    set_trace()
+  else:
+    train_DF = csv2DF(train, toBin=True)
+    test_DF = csv2DF(test)
+    tree = pyC45.dtree(train_DF)
+    # set_trace()
+    return patches(train=train, test=test, trainDF=train_DF, testDF=test_DF, tree=tree).main(justDeltas=justDeltas)
 
 if __name__ == '__main__':
   E = []
@@ -145,4 +150,3 @@ if __name__ == '__main__':
       aft.append(xtree(train, test))
     E.append(aft)
   rdivDemo(E)
-

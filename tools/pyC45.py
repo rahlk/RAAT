@@ -45,6 +45,89 @@ def dtree(tbl, rows=None, lvl=-1, asIs=10 ** 32, up=None, klass = -1, branch=[],
   N = len(klass)
   here.score = np.mean(klass)
   splits = discretize(feature, klass)
+  # set_trace()
+  LO, HI = min(feature), max(feature)
+  def pairs(lst):
+    while len(lst)>1:
+      yield (lst.pop(0), lst[0])
+  cutoffs = [t for t in pairs(sorted(list(set(splits+[LO,HI]))))]
+
+  if lvl>(opt.maxLvL if opt.prune else int(len(features)*opt.infoPrune)):
+    return here
+  if asIs == 0:
+    return here
+  if len(features)<1:
+    return here
+
+  def rows():
+    for span in cutoffs:
+      new=[]
+      for f, row in zip(feature, remaining.values.tolist()):
+        if span[0]<=f<span[1]:
+          new.append(row)
+        elif f==span[1]==HI:
+          new.append(row)
+      yield pd.DataFrame(new,columns=remaining.columns), span
+
+  def ent(x):
+    C = Counter(x)
+    N = len(x)
+    return sum([-C[n]/N*np.log(C[n]/N) for n in C.keys()])
+
+  for child, span in rows():
+    n = child.shape[0]
+    toBe = ent(child[child.columns[opt.klass]])
+    if opt.min<=n<N:
+      here.kids += [dtree(child, lvl=lvl + 1, asIs=toBe, up=here
+                          , branch= branch + [(name, span)]
+                          , f=name, val=span, opt=opt)]
+
+  return here
+  # # ------ Debug ------
+  # set_trace()
+
+def dtree2(tbl, rows=None, lvl=-1, asIs=10 ** 32, up=None, klass = -1, branch=[],
+          f=None, val=None, opt=None):
+  """
+  Discrete independent variables
+  :param tbl:
+  :param rows:
+  :param lvl:
+  :param asIs:
+  :param up:
+  :param klass:
+  :param branch:
+  :param f:
+  :param val:
+  :param opt:
+  :return:
+  """
+  if not opt:
+      opt = Thing(
+         min=1,
+         maxLvL=10,
+         infoPrune=0.5,
+         klass=-1,
+         prune=True,
+         debug=True,
+         verbose=True)
+
+  here = Thing(t=tbl, kids=[], f=f, val=val, up=up, lvl=lvl
+              , rows=rows, modes={}, branch=branch)
+
+  features = fWeight(tbl)
+
+  if opt.prune and lvl<0:
+    features = fWeight(tbl)[:int(len(features)*opt.infoPrune)]
+
+  name = features.pop(0)
+  remaining = tbl[features+[tbl.columns[opt.klass]]]
+  feature = tbl[name].values
+  klass = tbl[tbl.columns[opt.klass]].values
+  N = len(klass)
+  here.score = np.mean(klass)
+  splits = discretize(feature, klass)
+  # set_trace()
   LO, HI = min(feature), max(feature)
   def pairs(lst):
     while len(lst)>1:
@@ -114,9 +197,8 @@ def leaves(tree):
     if not node.kids:
       yield node
 
-@staticmethod
 def _test():
-  tbl_loc = explore(name='ant')[0]
+  tbl_loc = explore(dir='../Data/Seigmund/', name='Apache')
   tbl = csv2DF(tbl_loc)
 
   # Define Tree settings
@@ -125,7 +207,7 @@ def _test():
          maxLvL=10,
          infoPrune=0.5,
          klass=-1,
-         prune=True,
+         prune=False,
          debug=True,
          verbose=True)
 
