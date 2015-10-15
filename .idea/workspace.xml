@@ -2,37 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ed744215-16f1-4de9-bfa4-c1ed2d3a97c7" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/config.py" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Data/Seigmund/ApacheAll.csv" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Data/Seigmund/BDBCAll.csv" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Data/Seigmund/BDBJAll.csv" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Data/Seigmund/LLVMAll.csv" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Data/Seigmund/SQLAll.csv" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Data/Seigmund/X264All.csv" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Data/Seigmund/tmp/Apache/Test.csv" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Data/Seigmund/tmp/Apache/Train.csv" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Data/Seigmund/tmp/BDBC/Test.csv" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Data/Seigmund/tmp/BDBC/Train.csv" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Data/Seigmund/tmp/BDBJ/Test.csv" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Data/Seigmund/tmp/BDBJ/Train.csv" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Data/Seigmund/tmp/LLVM/Test.csv" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Data/Seigmund/tmp/LLVM/Train.csv" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Data/Seigmund/tmp/SQL/Test.csv" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Data/Seigmund/tmp/SQL/Train.csv" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Data/Seigmund/tmp/X264/Test.csv" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Data/Seigmund/tmp/X264/Train.csv" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Planners/BIC.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Planners/strawman.py" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Planners/CD.py" afterPath="$PROJECT_DIR$/Planners/CD.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Discretize.py" afterPath="$PROJECT_DIR$/tools/Discretize.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/RAAT.iml" afterPath="$PROJECT_DIR$/.idea/RAAT.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/defects.py" afterPath="$PROJECT_DIR$/defects.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/misc.py" afterPath="$PROJECT_DIR$/tools/misc.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/pyC45.py" afterPath="$PROJECT_DIR$/tools/pyC45.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../e-disc/stackexchange.py" afterPath="$PROJECT_DIR$/../e-disc/stackexchange.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Planners/xtree.py" afterPath="$PROJECT_DIR$/Planners/xtree.py" />
     </list>
     <ignored path="RAAT.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -73,10 +45,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="CD.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="CD.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Planners/CD.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.41848907">
+            <state vertical-scroll-proportion="0.0">
               <caret line="99" column="14" selection-start-line="99" selection-start-column="14" selection-end-line="99" selection-end-column="14" />
               <folding>
                 <element signature="e#14#61#0" expanded="true" />
@@ -90,6 +62,16 @@
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
               <caret line="19" column="0" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/.gitignore">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.8946322">
+              <caret line="60" column="1" selection-start-line="60" selection-start-column="1" selection-end-line="60" selection-end-column="1" />
               <folding />
             </state>
           </provider>
@@ -188,6 +170,7 @@
         <option value="$PROJECT_DIR$/Planners/xtree.py" />
         <option value="$PROJECT_DIR$/defects.py" />
         <option value="$PROJECT_DIR$/Planners/CD.py" />
+        <option value="$PROJECT_DIR$/.gitignore" />
       </list>
     </option>
   </component>
@@ -654,9 +637,9 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-1920" y="23" width="1920" height="1055" extended-state="6" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
-      <window_info id="Terminal" active="true" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.46145833" sideWeight="0.5" order="4" side_tool="false" content_ui="combo" x="960" y="23" width="960" height="1053" />
+      <window_info id="Terminal" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.46145833" sideWeight="0.5" order="4" side_tool="false" content_ui="combo" x="960" y="23" width="960" height="1053" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32954547" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -678,6 +661,9 @@
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="combo" />
     </layout>
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.gitignore" />
   </component>
   <component name="Vcs.Log.UiProperties">
     <option name="RECENTLY_FILTERED_USER_GROUPS">
@@ -961,11 +947,13 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/defects.py">
+    <entry file="file://$PROJECT_DIR$/Planners/CD.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="19" column="0" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
-          <folding />
+          <caret line="99" column="14" selection-start-line="99" selection-start-column="14" selection-end-line="99" selection-end-column="14" />
+          <folding>
+            <element signature="e#14#61#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -979,13 +967,19 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Planners/CD.py">
+    <entry file="file://$PROJECT_DIR$/defects.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.41848907">
-          <caret line="99" column="14" selection-start-line="99" selection-start-column="14" selection-end-line="99" selection-end-column="14" />
-          <folding>
-            <element signature="e#14#61#0" expanded="true" />
-          </folding>
+        <state vertical-scroll-proportion="0.0">
+          <caret line="19" column="0" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.8946322">
+          <caret line="60" column="1" selection-start-line="60" selection-start-column="1" selection-end-line="60" selection-end-column="1" />
+          <folding />
         </state>
       </provider>
     </entry>
