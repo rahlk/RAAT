@@ -3,7 +3,7 @@ __author__ = 'rkrsn'
 from Planners.CD import *
 from Planners.xtree import xtree
 from tools.sk import rdivDemo
-from tools.misc import explore
+from tools.misc import explore, say
 
 def temporal():
   for name in ['ant', 'ivy', 'jedit', 'lucene', 'poi']:
@@ -34,6 +34,16 @@ def cross():
 def deltas():
   from collections import Counter
   counts = {}
+
+  def save2plot(header, counts, labels, N):
+    for h in header: say(h+' ')
+    print('')
+    for l in labels:
+      say(l[1:]+' ')
+      for k in counts.keys():
+        say("%0.2f "%(counts[k][l]*100/N))
+      print('')
+    set_trace()
   for name in ['ant', 'ivy', 'jedit', 'lucene', 'poi']:
     print("##", name)
     e=[]
@@ -45,7 +55,10 @@ def deltas():
         everything, changes = planners(train, test, justDeltas=True)
         for ch in changes: keys.extend(ch.keys())
         counts.update({planners.__doc__:Counter(keys)})
-    set_trace()
+    header = ['Features']+counts.keys()
+    save2plot(header, counts, everything, N=len(changes))
+    # set_trace()
+    print()
 
 if __name__=='__main__':
   deltas()
