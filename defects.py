@@ -12,7 +12,7 @@ def temporal():
     train, test = explore(dir='Data/Jureczko/', name=name)
     for planners in [xtree, method1, method2, method3]:
       aft = [planners.__doc__]
-      for _ in xrange(1):
+      for _ in xrange(10):
         aft.append(planners(train, test, justDeltas=False))
         set_trace()
       e.append(aft)
@@ -25,13 +25,14 @@ def cross():
     train, test = explore(dir='Data/Jureczko/', name=name)
     for planners in [xtree, method1, method2, method3]:
       aft = [planners.__doc__]
-      for _ in xrange(1):
+      for _ in xrange(10):
         aft.append(planners(train, test, justDeltas=False))
         set_trace()
       e.append(aft)
     rdivDemo(e)
 
 def deltas():
+
   from collections import Counter
   counts = {}
 
@@ -43,7 +44,8 @@ def deltas():
       for k in counts.keys():
         say("%0.2f "%(counts[k][l]*100/N))
       print('')
-    set_trace()
+
+
   for name in ['ant', 'ivy', 'jedit', 'lucene', 'poi']:
     print("##", name)
     e=[]
@@ -61,4 +63,5 @@ def deltas():
     print()
 
 if __name__=='__main__':
-  deltas()
+  temporal()
+  # deltas()
