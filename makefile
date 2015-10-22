@@ -2,7 +2,7 @@ typo: ready
 	@- git add --all .	
 	@- git status
 	@- git commit -am "commit with a makefile"
-	@- git push origin master # <== update as needed
+	@- git push origin master 
 
 commit: ready 
 	@- git status
