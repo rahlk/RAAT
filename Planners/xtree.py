@@ -116,10 +116,11 @@ class patches:
     return testInst.values.tolist()[0]
 
 
-  def main(i, reps=10, justDeltas=False):
+  def main(i, config=False, justDeltas=False):
     newRows = [i.patchIt(i.testDF.iloc[n]) for n in xrange(i.testDF.shape[0]) if i.testDF.iloc[n][-1]>0]
     newRows = pd.DataFrame(newRows, columns=i.testDF.columns)
-    before, after = rforest(i.train, newRows)
+    set_trace()
+    before, after = rforest(i.train, newRows, isBin = not config,regress=config)
     gain = (1-sum(after)/len(after))*100
     if not justDeltas:
       return gain
@@ -132,7 +133,10 @@ def xtree(train, test, justDeltas=False, config=False):
     data = csv2DF(train, toBin=False)
     shuffle(data)
     train_DF, test_DF=data[:int(len(data)/2)], data[int(len(data)/2):].reset_index(drop=True)
+    tree = pyC45.dtree2(train_DF)
+    patch = patches(train=train, test=test, trainDF=train_DF, testDF=test_DF, tree=tree).main(justDeltas=justDeltas)
     set_trace()
+
   else:
     train_DF = csv2DF(train, toBin=True)
     test_DF = csv2DF(test)

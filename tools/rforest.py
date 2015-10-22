@@ -68,7 +68,7 @@ def _smote():
   # ---- ::DEBUG:: -----
   set_trace()
 
-def rforest(train, test, tunings=None, smoteit=True, bin=True):
+def rforest(train, test, tunings=None, smoteit=True, bin=True, regress=False):
   "RF "
   if not isinstance(train, pd.core.frame.DataFrame):
     train = csv2DF(train, as_mtx=False, toBin=bin)
@@ -79,12 +79,21 @@ def rforest(train, test, tunings=None, smoteit=True, bin=True):
   if smoteit:
     train = SMOTE(train, resample=True)
   if not tunings:
-    clf = RandomForestClassifier(n_estimators=100, random_state=1)
+    if regress:
+      clf = RandomForestRegressor(n_estimators=100, random_state=1)
+    else:
+      clf = RandomForestClassifier(n_estimators=100, random_state=1)
   else:
-    clf = RandomForestClassifier(n_estimators=int(tunings[0]),
-                                 max_features=tunings[1] / 100,
-                                 min_samples_leaf=int(tunings[2]),
-                                 min_samples_split=int(tunings[3]))
+    if regress:
+      clf = RandomForestRegressor(n_estimators=int(tunings[0]),
+                                   max_features=tunings[1] / 100,
+                                   min_samples_leaf=int(tunings[2]),
+                                   min_samples_split=int(tunings[3]))
+    else:
+      clf = RandomForestClassifier(n_estimators=int(tunings[0]),
+                                   max_features=tunings[1] / 100,
+                                   min_samples_leaf=int(tunings[2]),
+                                   min_samples_split=int(tunings[3]))
   features = train.columns[:-1]
   klass = train[train.columns[-1]]
   clf.fit(train[features], klass)
