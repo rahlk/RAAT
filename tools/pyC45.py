@@ -115,7 +115,7 @@ def dtree2(tbl, rows=None, lvl=-1, asIs=10 ** 32, up=None, klass = -1, branch=[]
   klass = tbl[tbl.columns[opt.klass]].values
   N = len(klass)
   here.score = np.mean(klass)
-  # splits = discretize(feature, klass)
+  splits = discretize(feature, klass, discrete=True)
   LO, HI = min(feature), max(feature)
   def pairs(lst):
     while len(lst)>1:
