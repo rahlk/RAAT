@@ -14,7 +14,8 @@ def main():
     for planners in [xtree, method1, method2, method3]:
       aft = [planners.__doc__]
       for _ in xrange(1):
-        aft.append(planners(train=data, test=None, config=True))
+        new = planners(train=data, test=None, config=True)
+        set_trace()
       e.append(aft)
     rdivDemo(e)
 
