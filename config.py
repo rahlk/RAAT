@@ -11,13 +11,13 @@ def main():
     e=[]
     data = explore(dir='Data/Seigmund/', name=name)
     # set_trace()
-    for planners in [xtree, method1, method2, method3]:
+    for planners in [xtree]:#, method1, method2, method3]:
       aft = [planners.__doc__]
       for _ in xrange(1):
-        new = planners(train=data, test=None, config=True)
-        set_trace()
+        aft.append(planners(train=data, test=None, config=True))
       e.append(aft)
     rdivDemo(e)
+    # set_trace()
 
 if __name__=='__main__':
   main()
