@@ -108,17 +108,32 @@ class accuracy:
   """
   Test prediction accuracy with RF
   """
+
   def __init__(i):
     pass
 
   def main(i):
     train,test = explore(dir='Data/Jureczko/')
     for te in test:
+      print("# %s"%(te[0].split('/')[-2]))
+      E0, E1 = [],[]
       for tr in train:
-        actual, preds = rforest(tr, te)
-        abcd = ABCD(before=actual, after=preds)
-        F = np.array([k.stats()[1] for k in abcd()])
-        set_trace()
+        Pd=[tr[0].split('/')[-2]]
+        Pf=[tr[0].split('/')[-2]]
+        G =[tr[0].split('/')[-2]]
+        for _ in xrange(1):
+          actual, preds = rforest(tr, te)
+          abcd = ABCD(before=actual, after=preds)
+          F = np.array([k.stats()[-1] for k in abcd()])
+          # set_trace()
+          G.append(F[0])
+          # Pd.append(F[1][0])
+        E0.append(G)
+        # E1.append(Pf)
+      rdivDemo(E0)
+      # rdivDemo(E1)
+    set_trace()
+        # print("Pd: %0.2f, Pf: %0.2f"%(F[1][0],1-F[1][1]))
 
 if __name__=='__main__':
   accuracy().main()
