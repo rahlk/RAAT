@@ -16,4 +16,4 @@ set yrange [0:140] noreverse nowriteback
 x = 0.0
 i = 22
 ## Last datafile plotted: "ivy.csv"
-plot filename.".csv" using 2:xtic(1) ti col, '' u 3 ti col, '' u 4 ti col, '' u 5 ti col
+plot filename.".csv" using 2:xtic(1) ti col, '' u 3 ti col, '' u 4 ti col, '' u 5 ti col, '' u 6 ti col,

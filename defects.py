@@ -72,8 +72,37 @@ class cross:
           e.append(aft)
         rdivDemo(e)
       set_trace()
+  def deltas(self):
+    from collections import Counter
+
+    def save2plot(header, counts, labels, N):
+      for h in header: say(h+' ')
+      print('')
+      for l in labels:
+        say(l[1:]+' ')
+        for k in counts.keys():
+          say("%0.2f "%(counts[k][l]*100/N))
+        print('')
+
+    names=['ant', 'ivy', 'jedit', 'lucene', 'poi']
+    for planners in [xtree]:#, method1, method2, method3]:
+      counts = {}
+      for one in names:
+        e=[]
+        for two in names:
+          print("##", two, one)
+          aft = [two]
+          train,_ = explore(dir='Data/Jureczko/', name=two)
+          test,_  = explore(dir='Data/Jureczko/', name=one)
+          for _ in xrange(1):
+            keys=[]
+            everything, changes = planners(train, test, justDeltas=True)
+            for ch in changes: keys.extend(ch.keys())
+            counts.update({two:Counter(keys)})
+          # set_trace()
+        header = ['Features']+counts.keys()
+        save2plot(header, counts, everything, N=len(changes))
 
 if __name__=='__main__':
-
-  cross().improve1()
+  cross().deltas()
   # temporal().deltas()
