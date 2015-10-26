@@ -59,3 +59,6 @@ target/
 # Pycharm file
 .idea/
 *.xml
+
+# SVN
+.svn/
