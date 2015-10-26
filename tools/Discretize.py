@@ -48,7 +48,9 @@ def discretize(feature, klass, atleast=-1, discrete=False):
       N = len(x)
       return sum([-C[n]/N*np.log(C[n]/N) for n in C.keys()])
     def stdev(x):
-      set_trace()
+      if np.isnan(np.var(x)**0.5):
+        return 0
+      return np.var(x)**0.5
     if not discrete: return ent(x)
     else: return stdev(x)
 
@@ -71,17 +73,20 @@ def discretize(feature, klass, atleast=-1, discrete=False):
         T_min = np.argmin(T)
         left, right = feature[:T_min], feature[T_min:]
         k_l, k_r = klass[:T_min], klass[T_min:]
-
+        set_trace()
         def stop(k,k_l,k_r):
           gain =  E-T[T_min]
           def count(lst): return len(Counter(lst).keys())
           delta = np.log2(float(3**count(k)-2)) - (
               count(k)*measure(k)-count(k_l)*measure(k_l)-count(k_r)*measure(k_r))
-          # print(gain, (np.log2(N-1)+delta)/N)
+          print(gain, (np.log2(N-1)+delta)/N)
           return gain<(np.log2(N-1)+delta)/N or T_min==0
 
         if stop(klass,k_l,k_r) and lvl>=atleast:
-          splits.append(feature[T_min])
+          if discrete:
+            splits.append(T_min)
+          else:
+            splits.append(feature[T_min])
 
         else:
           _ = redo(feature=left, klass=k_l, lvl=lvl+1)
@@ -89,6 +94,7 @@ def discretize(feature, klass, atleast=-1, discrete=False):
 
   # ------ main ------
   redo(feature,klass, lvl=0)
+  set_trace()
   return splits
 
 def _test0():

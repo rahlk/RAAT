@@ -62,3 +62,6 @@ target/
 
 # SVN
 .svn/
+
+# MAC Stuff...
+.DS_Store

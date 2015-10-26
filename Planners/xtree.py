@@ -15,6 +15,9 @@ from timeit import time
 from random import uniform
 from numpy.random import normal as randn
 
+def trueValue(all,test):
+  set_trace()
+
 def flatten(x):
   """
   Takes an N times nested list of list like [[a,b],[c, [d, e]],[f]]
@@ -42,11 +45,12 @@ class changes():
 
 class patches:
 
-  def __init__(i,train,test,trainDF,testDF,tree=None):
+  def __init__(i,train,test,trainDF,testDF,tree=None,config=False):
     i.train=train
     i.trainDF = trainDF
     i.test=test
     i.testDF=testDF
+    i.config=config
     i.tree=tree
     i.change =[]
 
@@ -68,12 +72,17 @@ class patches:
     if len(t.kids)==0:
       return t
     for kid in t.kids:
-      try:
-        if kid.val[0]<=testInst[kid.f].values[0]<kid.val[1]:
+      if i.config:
+        if kid.val[0]==testInst[kid.f].values[0]:
           return i.find(testInst,kid)
-        elif kid.val[1]==testInst[kid.f].values[0]==i.trainDF.describe()[kid.f]['max']:
-          return i.find(testInst,kid)
-      except: set_trace()
+      else:
+        try:
+          if kid.val[0]<=testInst[kid.f].values[0]<kid.val[1]:
+            return i.find(testInst,kid)
+          elif kid.val[1]==testInst[kid.f].values[0]==i.trainDF.describe()[kid.f]['max']:
+            print('echo')
+            return i.find(testInst,kid)
+        except: set_trace()
     return t
 
   @staticmethod
@@ -81,19 +90,21 @@ class patches:
     common = [a for a in me.branch if a not in other.branch]
     return len(me.branch)-len(common)
 
-  def patchIt(i,testInst):
+  def patchIt(i,testInst, config=False):
     # 1. Find where t falls
     C = changes() # Record changes
     testInst = pd.DataFrame(testInst).transpose()
     current = i.find(testInst, i.tree)
     node = current
-
     while node.lvl > -1:
       node = node.up  # Move to tree root
 
     leaves = flatten([i.leaves(_k) for _k in node.kids])
     try:
-      best = sorted([l for l in leaves if l.score<=0.01*current.score], key=lambda F: i.howfar(current,F))[0]
+      if i.config:
+        best = sorted([l for l in leaves if l.score<current.score], key=lambda F: i.howfar(current,F))[0]
+      else:
+        best = sorted([l for l in leaves if l.score<=0.01*current.score], key=lambda F: i.howfar(current,F))[0]
     except:
       return testInst.values.tolist()[0]
 
@@ -107,7 +118,8 @@ class patches:
       before = testInst[ii[0]]
       if not ii in current.branch:
         then = testInst[ii[0]].values[0]
-        now = new(testInst[ii[0]].values[0], ii[1])
+        now = ii[1] if i.config else new(testInst[ii[0]].values[0], ii[1])
+        # print(current.branch,best.branch)
         testInst[ii[0]] = now
         C.save(name=ii[0], old=then, new=now)
 
@@ -116,29 +128,39 @@ class patches:
     return testInst.values.tolist()[0]
 
 
-  def main(i, reps=10, justDeltas=False):
-    newRows = [i.patchIt(i.testDF.iloc[n]) for n in xrange(i.testDF.shape[0]) if i.testDF.iloc[n][-1]>0]
+  def main(i, config=False, justDeltas=False):
+    newRows = [i.patchIt(i.testDF.iloc[n], config) for n in xrange(i.testDF.shape[0]) if i.testDF.iloc[n][-1]>0]
     newRows = pd.DataFrame(newRows, columns=i.testDF.columns)
-    before, after = rforest(i.train, newRows)
-    gain = (1-sum(after)/len(after))*100
+    before, after = rforest(i.train, newRows, bin = not i.config,regress=i.config)
+    newRows[newRows.columns[-1]] = after
+    gain = (1-sum(after)/sum(i.testDF[i.testDF.columns[-1]]))*100 if i.config else (1-sum(after)/len(after))*100
+    # print('Feature,Before,After')
+    # for n, a in enumerate(zip(sorted(i.testDF[i.testDF.columns[-1]]), sorted(after))):
+    #   print(n,',',a[0],',',a[1])
     if not justDeltas:
-      return gain
+      return newRows, gain
     else:
       return i.testDF.columns[:-1], i.change
 
-def xtree(train, test, justDeltas=False, config=False):
+def xtree(train, test, config,justDeltas=False):
   "XTREE"
   if config:
     data = csv2DF(train, toBin=False)
     shuffle(data)
     train_DF, test_DF=data[:int(len(data)/2)], data[int(len(data)/2):].reset_index(drop=True)
-    set_trace()
+    tree = pyC45.dtree2(train_DF)
+    patch = patches(train=train, test=test, trainDF=train_DF, testDF=test_DF, tree=tree, config=True)
+    return patch.main(justDeltas=justDeltas)[1]
+    # set_trace()
+
+
   else:
     train_DF = csv2DF(train, toBin=True)
     test_DF = csv2DF(test)
     tree = pyC45.dtree(train_DF)
     # set_trace()
-    return patches(train=train, test=test, trainDF=train_DF, testDF=test_DF, tree=tree).main(justDeltas=justDeltas)
+    patch = patches(train=train, test=test, trainDF=train_DF, testDF=test_DF, tree=tree)
+    return patch.main(justDeltas=justDeltas)[1]
 
 if __name__ == '__main__':
   E = []

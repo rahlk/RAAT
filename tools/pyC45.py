@@ -45,7 +45,7 @@ def dtree(tbl, rows=None, lvl=-1, asIs=10 ** 32, up=None, klass = -1, branch=[],
   N = len(klass)
   here.score = np.mean(klass)
   splits = discretize(feature, klass)
-  # set_trace()
+  set_trace()
   LO, HI = min(feature), max(feature)
   def pairs(lst):
     while len(lst)>1:
@@ -90,23 +90,12 @@ def dtree2(tbl, rows=None, lvl=-1, asIs=10 ** 32, up=None, klass = -1, branch=[]
           f=None, val=None, opt=None):
   """
   Discrete independent variables
-  :param tbl:
-  :param rows:
-  :param lvl:
-  :param asIs:
-  :param up:
-  :param klass:
-  :param branch:
-  :param f:
-  :param val:
-  :param opt:
-  :return:
   """
   if not opt:
       opt = Thing(
          min=1,
          maxLvL=10,
-         infoPrune=0.5,
+         infoPrune=1,
          klass=-1,
          prune=True,
          debug=True,
@@ -126,14 +115,14 @@ def dtree2(tbl, rows=None, lvl=-1, asIs=10 ** 32, up=None, klass = -1, branch=[]
   klass = tbl[tbl.columns[opt.klass]].values
   N = len(klass)
   here.score = np.mean(klass)
-  splits = discretize(feature, klass)
-  # set_trace()
+  splits = discretize(feature, klass, discrete=True)
   LO, HI = min(feature), max(feature)
   def pairs(lst):
     while len(lst)>1:
       yield (lst.pop(0), lst[0])
-  cutoffs = [t for t in pairs(sorted(list(set(splits+[LO,HI]))))]
+  cutoffs = [LO, HI]
 
+  # set_trace()
   if lvl>(opt.maxLvL if opt.prune else int(len(features)*opt.infoPrune)):
     return here
   if asIs == 0:
@@ -145,9 +134,7 @@ def dtree2(tbl, rows=None, lvl=-1, asIs=10 ** 32, up=None, klass = -1, branch=[]
     for span in cutoffs:
       new=[]
       for f, row in zip(feature, remaining.values.tolist()):
-        if span[0]<=f<span[1]:
-          new.append(row)
-        elif f==span[1]==HI:
+        if f==span:
           new.append(row)
       yield pd.DataFrame(new,columns=remaining.columns), span
 
@@ -157,12 +144,13 @@ def dtree2(tbl, rows=None, lvl=-1, asIs=10 ** 32, up=None, klass = -1, branch=[]
     return sum([-C[n]/N*np.log(C[n]/N) for n in C.keys()])
 
   for child, span in rows():
+    # set_trace()
     n = child.shape[0]
     toBe = ent(child[child.columns[opt.klass]])
     if opt.min<=n<N:
-      here.kids += [dtree(child, lvl=lvl + 1, asIs=toBe, up=here
+      here.kids += [dtree2(child, lvl=lvl + 1, asIs=toBe, up=here
                           , branch= branch + [(name, span)]
-                          , f=name, val=span, opt=opt)]
+                          , f=name, val=(span, span), opt=opt)]
 
   return here
   # # ------ Debug ------

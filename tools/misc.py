@@ -42,7 +42,7 @@ def explore(dir='../Data/Jureczko/', name=None):
             training = [train[0][0] + '/' + p for p in train[0][1] if not p == '.DS_Store']
             testing = test
             return training, testing
-          else:
+          elif 'Seigmund' in dir:
             train = [dir+name+'/'+fname[0] for dirPath, _, fname in walk(k)]
             return train
   else:
