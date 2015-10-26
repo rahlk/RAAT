@@ -74,7 +74,7 @@ def rforest(train, test, tunings=None, smoteit=True, bin=True, regress=False):
     train = csv2DF(train, as_mtx=False, toBin=bin)
 
   if not isinstance(test, pd.core.frame.DataFrame):
-    test_DF = csv2DF(test, as_mtx=False, toBin=True)
+    test = csv2DF(test, as_mtx=False, toBin=True)
 
   if smoteit:
     train = SMOTE(train, resample=True)

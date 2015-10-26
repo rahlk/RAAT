@@ -4,6 +4,7 @@ from Planners.CD import *
 from Planners.xtree import xtree
 from tools.sk import rdivDemo
 from tools.misc import explore, say
+from tools.stats import ABCD
 
 class temporal:
   def __init__(self):
@@ -103,6 +104,22 @@ class cross:
         header = ['Features']+counts.keys()
         save2plot(header, counts, everything, N=len(changes))
 
+class accuracy:
+  """
+  Test prediction accuracy with RF
+  """
+  def __init__(i):
+    pass
+
+  def main(i):
+    train,test = explore(dir='Data/Jureczko/')
+    for te in test:
+      for tr in train:
+        actual, preds = rforest(tr, te)
+        abcd = ABCD(before=actual, after=preds)
+        F = np.array([k.stats()[1] for k in abcd()])
+        set_trace()
+
 if __name__=='__main__':
-  cross().deltas()
+  accuracy().main()
   # temporal().deltas()
