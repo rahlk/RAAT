@@ -133,8 +133,59 @@ class accuracy:
       rdivDemo(E0)
       # rdivDemo(E1)
     set_trace()
-        # print("Pd: %0.2f, Pf: %0.2f"%(F[1][0],1-F[1][1]))
+
+
+class mccabe:
+  """
+  MacCabe Halsted dataset
+  """
+
+  def __init__(self):
+    pass
+  def deltas(self):
+    from collections import Counter
+    counts = {}
+
+    def save2plot(header, counts, labels, N):
+      for h in header: say(h+' ')
+      print('')
+      for l in labels:
+        say(l[1:]+' ')
+        for k in counts.keys():
+          say("%0.2f "%(counts[k][l]*100/N))
+        print('')
+
+
+    for name in ['ant', 'ivy', 'jedit', 'lucene', 'poi']:
+      print("##", name)
+      e=[]
+      train, test = explore(dir='Data/mccabe/', name=name)
+      for planners in [xtree, method1, method2, method3]:
+        # aft = [planners.__doc__]
+        for _ in xrange(1):
+          keys=[]
+          everything, changes = planners(train, test, justDeltas=True)
+          for ch in changes: keys.extend(ch.keys())
+          counts.update({planners.__doc__:Counter(keys)})
+      header = ['Features']+counts.keys()
+      save2plot(header, counts, everything, N=len(changes))
+
+  def improve(self):
+    for name in ['cm', 'ar', 'jm', 'kc', 'mc', 'mw', 'pc']:
+      print("##", name)
+      train, test = explore(dir='Data/mccabe/', name=name)
+      all = train+test
+      for test in all:
+        if not test==train:
+          e=[]
+          for planners in [xtree, method1, method2, method3]:
+            aft = [planners.__doc__]
+            for _ in xrange(10):
+              aft.append(planners(train = [aa for aa in all if not aa==test], test=[test], justDeltas=False))
+              # set_trace()
+            e.append(aft)
+          rdivDemo(e)
 
 if __name__=='__main__':
-  accuracy().main()
-  # temporal().deltas()
+  # accuracy().main()
+  mccabe().improve()

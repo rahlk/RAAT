@@ -80,7 +80,6 @@ class patches:
           if kid.val[0]<=testInst[kid.f].values[0]<kid.val[1]:
             return i.find(testInst,kid)
           elif kid.val[1]==testInst[kid.f].values[0]==i.trainDF.describe()[kid.f]['max']:
-            print('echo')
             return i.find(testInst,kid)
         except: set_trace()
     return t
@@ -129,20 +128,21 @@ class patches:
 
 
   def main(i, config=False, justDeltas=False):
-    newRows = [i.patchIt(i.testDF.iloc[n], config) for n in xrange(i.testDF.shape[0]) if i.testDF.iloc[n][-1]>0]
+    newRows = [i.patchIt(i.testDF.iloc[n], config) for n in xrange(i.testDF.shape[0]) if i.testDF.iloc[n][-1]>0 or i.testDF.iloc[n][-1]==True]
     newRows = pd.DataFrame(newRows, columns=i.testDF.columns)
-    before, after = rforest(i.train, newRows, bin = not i.config,regress=i.config)
+    # set_trace()
+    before, after = rforest(i.train, newRows, bin = not i.config, regress=i.config)
     newRows[newRows.columns[-1]] = after
     gain = (1-sum(after)/sum(i.testDF[i.testDF.columns[-1]]))*100 if i.config else (1-sum(after)/len(after))*100
     # print('Feature,Before,After')
     # for n, a in enumerate(zip(sorted(i.testDF[i.testDF.columns[-1]]), sorted(after))):
-    #   print(n,',',a[0],',',a[1])
+    # print(n,',',a[0],',',a[1])
     if not justDeltas:
       return newRows, gain
     else:
       return i.testDF.columns[:-1], i.change
 
-def xtree(train, test, config,justDeltas=False):
+def xtree(train, test, config=False,justDeltas=False):
   "XTREE"
   if config:
     data = csv2DF(train, toBin=False)

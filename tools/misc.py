@@ -36,10 +36,11 @@ def explore(dir='../Data/Jureczko/', name=None):
   if name:
       for k in datasets[1:]:
         if name in k:
-          if 'Jureczko' in dir:
+          if 'Jureczko' or 'mccabe' in dir:
             train = [[dirPath, fname] for dirPath, _, fname in walk(k)]
             test = [train[0][0] + '/' + train[0][1].pop(-1)]
-            training = [train[0][0] + '/' + p for p in train[0][1] if not p == '.DS_Store']
+            # set_trace()
+            training = [train[0][0] + '/' + p for p in train[0][1] if not p == '.DS_Store' and '.csv' in p]
             testing = test
             return training, testing
           elif 'Seigmund' in dir:

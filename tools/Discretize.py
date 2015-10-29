@@ -73,13 +73,13 @@ def discretize(feature, klass, atleast=-1, discrete=False):
         T_min = np.argmin(T)
         left, right = feature[:T_min], feature[T_min:]
         k_l, k_r = klass[:T_min], klass[T_min:]
-        set_trace()
+        # set_trace()
         def stop(k,k_l,k_r):
           gain =  E-T[T_min]
           def count(lst): return len(Counter(lst).keys())
           delta = np.log2(float(3**count(k)-2)) - (
               count(k)*measure(k)-count(k_l)*measure(k_l)-count(k_r)*measure(k_r))
-          print(gain, (np.log2(N-1)+delta)/N)
+          # print(gain, (np.log2(N-1)+delta)/N)
           return gain<(np.log2(N-1)+delta)/N or T_min==0
 
         if stop(klass,k_l,k_r) and lvl>=atleast:
@@ -94,7 +94,7 @@ def discretize(feature, klass, atleast=-1, discrete=False):
 
   # ------ main ------
   redo(feature,klass, lvl=0)
-  set_trace()
+  # set_trace()
   return splits
 
 def _test0():

@@ -96,6 +96,7 @@ def rforest(train, test, tunings=None, smoteit=True, bin=True, regress=False):
                                    min_samples_split=int(tunings[3]))
   features = train.columns[:-1]
   klass = train[train.columns[-1]]
+  # set_trace()
   clf.fit(train[features], klass)
   actual = test[test.columns[-1]].as_matrix()
   preds = clf.predict(test[test.columns[:-1]])
