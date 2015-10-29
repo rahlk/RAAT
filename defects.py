@@ -171,7 +171,7 @@ class mccabe:
       save2plot(header, counts, everything, N=len(changes))
 
   def improve(self):
-    for name in ['cm', 'ar', 'kc', 'jm', 'mw']:
+    for name in ['jm', 'cm', 'ar', 'kc', 'jm', 'mw']:
       print("##", name)
       train, test = explore(dir='Data/mccabe/', name=name)
       all = train+test
@@ -180,7 +180,7 @@ class mccabe:
           e=[]
           for planners in [xtree, method1, method2, method3]:
             aft = [planners.__doc__]
-            for _ in xrange(10):
+            for _ in xrange(1):
               aft.append(planners(train = [aa for aa in all if not aa==test], test=[test], justDeltas=False))
               # set_trace()
             e.append(aft)
