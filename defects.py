@@ -206,5 +206,6 @@ class mccabe:
 
 if __name__=='__main__':
   # accuracy().main()
-  mccabe().improve()
+  cross().improve1()
+  # mccabe().improve()
   # mccabe().acc()
