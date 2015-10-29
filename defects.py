@@ -171,7 +171,7 @@ class mccabe:
       save2plot(header, counts, everything, N=len(changes))
 
   def improve(self):
-    for name in ['cm', 'ar', 'jm', 'kc', 'mc', 'mw']:
+    for name in ['cm', 'ar', 'kc', 'jm', 'mw']:
       print("##", name)
       train, test = explore(dir='Data/mccabe/', name=name)
       all = train+test
@@ -206,5 +206,5 @@ class mccabe:
 
 if __name__=='__main__':
   # accuracy().main()
-  # mccabe().improve()
-  mccabe().acc()
+  mccabe().improve()
+  # mccabe().acc()
