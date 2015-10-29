@@ -77,7 +77,8 @@ def rforest(train, test, tunings=None, smoteit=True, bin=True, regress=False):
     test = csv2DF(test, as_mtx=False, toBin=True)
 
   if smoteit:
-    train = SMOTE(train, resample=True)
+    try: train = SMOTE(train, resample=True)
+    except: set_trace()
   if not tunings:
     if regress:
       clf = RandomForestRegressor(n_estimators=100, random_state=1)
@@ -99,7 +100,8 @@ def rforest(train, test, tunings=None, smoteit=True, bin=True, regress=False):
   # set_trace()
   clf.fit(train[features], klass)
   actual = test[test.columns[-1]].as_matrix()
-  preds = clf.predict(test[test.columns[:-1]])
+  try: preds = clf.predict(test[test.columns[:-1]])
+  except: set_trace()
   return actual, preds
 
 def _RF():

@@ -171,7 +171,7 @@ class mccabe:
       save2plot(header, counts, everything, N=len(changes))
 
   def improve(self):
-    for name in ['cm', 'ar', 'jm', 'kc', 'mc', 'mw', 'pc']:
+    for name in ['cm', 'ar', 'jm', 'kc', 'mc', 'mw']:
       print("##", name)
       train, test = explore(dir='Data/mccabe/', name=name)
       all = train+test
@@ -185,7 +185,25 @@ class mccabe:
               # set_trace()
             e.append(aft)
           rdivDemo(e)
+  def acc(self):
+    for name in ['pc', 'kc', 'cm', 'ar', 'jm', 'mc', 'mw']:
+      print("##", name)
+      train, test = explore(dir='Data/mccabe/', name=name)
+      all = train+test
+      E0=[]
+      for test in all:
+        if not test==train:
+          # set_trace()
+          G =[test.split('/')[-1][:-4]]
+          actual, preds = rforest(train=[aa for aa in all if not aa==test], test=[test])
+          abcd = ABCD(before=actual, after=preds)
+          F = np.array([k.stats()[-1] for k in abcd()])
+          # set_trace()
+          G.append(F[0])
+        E0.append(G)
+      rdivDemo(E0)
 
 if __name__=='__main__':
   # accuracy().main()
-  mccabe().improve()
+  # mccabe().improve()
+  mccabe().acc()

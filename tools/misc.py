@@ -19,6 +19,9 @@ def csv2DF(dir, as_mtx=False, toBin=False):
   for f in dir:
     df=read_csv(f)
     headers = [h for h in df.columns if '?' not in h]
+    # set_trace()
+    if isinstance(df[df.columns[-1]][0], str):
+      df[df.columns[-1]] = DataFrame([0 if 'N' in d or 'n' in d else 1 for d in df[df.columns[-1]]])
     if toBin:
       df[df.columns[-1]]=DataFrame([1 if d > 0 else 0 for d in df[df.columns[-1]]])
     files.append(df[headers])
