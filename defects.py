@@ -186,9 +186,10 @@ class mccabe:
             e.append(aft)
           rdivDemo(e)
   def acc(self):
-    for name in ['pc', 'kc', 'cm', 'ar', 'jm', 'mc', 'mw']:
+    for name in ['MC']:#, 'kc', 'cm', 'ar', 'jm', 'mw']:
       print("##", name)
       train, test = explore(dir='Data/mccabe/', name=name)
+      # set_trace()
       all = train+test
       E0=[]
       for test in all:
