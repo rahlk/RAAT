@@ -14,6 +14,7 @@ from tools.Discretize import discretize
 from timeit import time
 from random import uniform
 from numpy.random import normal as randn
+from tools.tune.dEvol import tuner
 
 def trueValue(all,test):
   set_trace()
@@ -45,14 +46,16 @@ class changes():
 
 class patches:
 
-  def __init__(i,train,test,trainDF,testDF,tree=None,config=False):
+  def __init__(i,train,test,trainDF,testDF,rfTrain,tree=None,config=False):
     i.train=train
     i.trainDF = trainDF
+    i.rftrain = rfTrain
     i.test=test
     i.testDF=testDF
     i.config=config
     i.tree=tree
     i.change =[]
+    i.tunings = tuner(i.rftrain)
 
   def leaves(i, node):
     """
@@ -130,22 +133,21 @@ class patches:
   def main(i, config=False, justDeltas=False):
     newRows = [i.patchIt(i.testDF.iloc[n], config) for n in xrange(i.testDF.shape[0]) if i.testDF.iloc[n][-1]>0 or i.testDF.iloc[n][-1]==True]
     newRows = pd.DataFrame(newRows, columns=i.testDF.columns)
-    # set_trace()
-    before, after = rforest(i.train, newRows, bin = not i.config, regress=i.config)
+
+    before, after = rforest(i.rftrain, newRows, tunings=i.tunings, bin = not i.config, regress=i.config)
     newRows[newRows.columns[-1]] = after
     gain = (1-sum(after)/sum(i.testDF[i.testDF.columns[-1]]))*100 if i.config else (1-sum(after)/len(after))*100
-    # print('Feature,Before,After')
-    # for n, a in enumerate(zip(sorted(i.testDF[i.testDF.columns[-1]]), sorted(after))):
-    # print(n,',',a[0],',',a[1])
+
     if not justDeltas:
       return newRows, gain
     else:
       return i.testDF.columns[:-1], i.change
 
-def xtree(train, test, config=False,justDeltas=False):
+def xtree(train, test, rftrain=None, config=False,justDeltas=False):
   "XTREE"
   if config:
-    data = csv2DF(train, toBin=False)
+    # set_trace()
+    data = csv2DF(train[1], toBin=False)
     shuffle(data)
     train_DF, test_DF=data[:int(len(data)/2)], data[int(len(data)/2):].reset_index(drop=True)
     tree = pyC45.dtree2(train_DF)
@@ -156,11 +158,12 @@ def xtree(train, test, config=False,justDeltas=False):
 
   else:
     train_DF = csv2DF(train, toBin=True)
+    if not rftrain: rftrain=train
     test_DF = csv2DF(test)
     tree = pyC45.dtree(train_DF)
     # set_trace()
-    patch = patches(train=train, test=test, trainDF=train_DF, testDF=test_DF, tree=tree)
-    return patch.main(justDeltas=justDeltas)[1]
+    patch = patches(train=train, test=test, trainDF=train_DF, testDF=test_DF, rfTrain=rftrain, tree=tree)
+    return patch.main(justDeltas=justDeltas)
 
 if __name__ == '__main__':
   E = []

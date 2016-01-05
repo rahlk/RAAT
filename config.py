@@ -11,13 +11,13 @@ def main():
     print("##", name)
     data = explore(dir='Data/Seigmund/', name=name)
     # set_trace()
-    for planners in [xtree]:#, method1, method2, method3]:
+    for planners in [xtree, method3]:#, method2, method3]:
       # aft = [planners.__doc__]
       aft = [name]
       for _ in xrange(10):
         aft.append(planners(train=data, test=None, config=True))
       e.append(aft)
-  rdivDemo(e)
+  rdivDemo(e, isLatex=True)
     # set_trace()
 
 if __name__=='__main__':

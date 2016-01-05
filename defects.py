@@ -5,7 +5,7 @@ from Planners.xtree import xtree
 from tools.sk import rdivDemo
 from tools.misc import explore, say
 from tools.stats import ABCD
-
+from tools.tune.dEvol import tuner
 class temporal:
   def __init__(self):
     pass
@@ -27,7 +27,7 @@ class temporal:
       print("##", name)
       e=[]
       train, test = explore(dir='Data/Jureczko/', name=name)
-      for planners in [xtree, method1, method2, method3]:
+      for planners in [xtree]:#, method1, method2, method3]:
         # aft = [planners.__doc__]
         for _ in xrange(1):
           keys=[]
@@ -38,17 +38,17 @@ class temporal:
       save2plot(header, counts, everything, N=len(changes))
 
   def improve(self):
-    for name in ['ant', 'ivy', 'jedit', 'lucene', 'poi']:
+    for name in ['lucene', 'poi', 'ant', 'ivy', 'jedit']:
       print("##", name)
       e=[]
       train, test = explore(dir='Data/Jureczko/', name=name)
-      for planners in [xtree, method1, method2, method3]:
+      for planners in [xtree]:#, method1, method2, method3]:
         aft = [planners.__doc__]
-        for _ in xrange(10):
+        for _ in xrange(1):
           aft.append(planners(train, test, justDeltas=False))
           # set_trace()
         e.append(aft)
-      rdivDemo(e)
+      rdivDemo(e, isLatex=True, globalMinMax=True, high=100, low=0)
 
 class cross:
   def __init__(self):
@@ -65,14 +65,40 @@ class cross:
         for two in names:
           print("##", two, one)
           aft = [two]
-          train,_ = explore(dir='Data/Jureczko/', name=two)
-          test,_  = explore(dir='Data/Jureczko/', name=one)
+          train0,train1 = explore(dir='Data/Jureczko/', name=two)
+          rfTrain, test  = explore(dir='Data/Jureczko/', name=one)
+          train = list(set([t for t in train0+train1 if not t in test]))
+          # set_trace()
           for _ in xrange(10):
-            aft.append(planners(train, test, justDeltas=False))
+            _, new = planners(train, test, rftrain = rfTrain, justDeltas=False)
+            aft.append(new)
             # set_trace()
           e.append(aft)
         rdivDemo(e)
-      set_trace()
+
+  # def accuracy(self):
+  #   """
+  #   Learn from all other projects. Compare the results.
+  #   :return:
+  #   """
+  #   names=['ant', 'ivy', 'jedit', 'lucene', 'poi']
+  #   for planners in [xtree]:#, method1, method2, method3]:
+  #     for one in names:
+  #       e=[]
+  #       for two in names:
+  #         print("##", one)
+  #         aft = [two]
+  #         train = csv2DF(explore(dir='Data/Jureczko/', name=two)[0])
+  #         test  = csv2DF(explore(dir='Data/Jureczko/', name=one)[0])
+  #         for _ in xrange(10):
+  #           actual, predicted = rforest(train, test, bin=True, regress=False)
+  #
+  #           _, new = planners(train, test, justDeltas=False)
+  #           aft.append(new)
+  #           # set_trace()
+  #         e.append(aft)
+  #       rdivDemo(e)
+
   def deltas(self):
     from collections import Counter
 
@@ -91,7 +117,7 @@ class cross:
       for one in names:
         e=[]
         for two in names:
-          print("##", two, one)
+          # print("##", two, one)
           aft = [two]
           train,_ = explore(dir='Data/Jureczko/', name=two)
           test,_  = explore(dir='Data/Jureczko/', name=one)
@@ -114,24 +140,31 @@ class accuracy:
 
   def main(i):
     train,test = explore(dir='Data/Jureczko/')
-    for te in test:
-      print("# %s"%(te[0].split('/')[-2]))
+    # set_trace()
+    print("Train - Test, Pd, Pf")
+    # print("# %s"%(te[0].split('/')[-2]))
+    for _,te in zip(train,test):
       E0, E1 = [],[]
       for tr in train:
         Pd=[tr[0].split('/')[-2]]
         Pf=[tr[0].split('/')[-2]]
         G =[tr[0].split('/')[-2]]
-        for _ in xrange(1):
-          actual, preds = rforest(tr, te)
-          abcd = ABCD(before=actual, after=preds)
-          F = np.array([k.stats()[-1] for k in abcd()])
-          # set_trace()
-          G.append(F[0])
-          # Pd.append(F[1][0])
-        E0.append(G)
+        # for _ in xrange(1):
+        tunings = tuner(tr)
+        actual, preds = rforest(tr, te, tunings=tunings)
+        abcd = ABCD(before=actual, after=preds)
+        F = np.array([k.stats()[-2] for k in abcd()])
+        Pd0 = np.array([k.stats()[0] for k in abcd()])
+        Pf0 = np.array([k.stats()[1] for k in abcd()])
+        # set_trace()
+        G.append(F[0])
+        say(tr[0].split('/')[-2]+' - '+te[0].split('/')[-2]+' %0.2f, %0.2f\n'%(Pd0[1], 1-Pf0[1]))
+        Pd.append(Pd0)
+        Pf.append(Pf0)
+        # E0.append(G)
         # E1.append(Pf)
-      rdivDemo(E0)
-      # rdivDemo(E1)
+        # rdivDemo(E0)
+        # rdivDemo(E1)
     set_trace()
 
 
@@ -205,7 +238,9 @@ class mccabe:
       rdivDemo(E0)
 
 if __name__=='__main__':
-  # accuracy().main()
-  cross().improve1()
+  accuracy().main()
+  # cross().improve1()
   # mccabe().improve()
   # mccabe().acc()
+  # temporal().improve()
+  # cross().deltas()
