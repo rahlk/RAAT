@@ -84,6 +84,7 @@ def de0(model, new=[], pop=int(1e4), iter=1000, lives=5, settings=settings):
   return sorted(frontier, key=lambda F: model.solve(F))[-1]
 
 def tuner(data):
-  mdl = rf(data=data)
-  return de0(mdl,pop=10, iter=100)
-
+  if len(data)==1:
+    return None
+  else:
+    return de0(model = rf(data=data),pop=10, iter=100)

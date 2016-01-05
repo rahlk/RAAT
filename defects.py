@@ -6,6 +6,7 @@ from tools.sk import rdivDemo
 from tools.misc import explore, say
 from tools.stats import ABCD
 from tools.tune.dEvol import tuner
+
 class temporal:
   def __init__(self):
     pass
@@ -58,17 +59,18 @@ class cross:
     Learn from all other projects. Compare the results.
     :return:
     """
-    names=['ant', 'ivy', 'jedit', 'lucene', 'poi']
+    # names=['ant', 'ivy', 'jedit', 'lucene', 'poi']
+    train,test = explore(dir='Data/Jureczko/')
     for planners in [xtree]:#, method1, method2, method3]:
-      for one in names:
+      for one in test:
         e=[]
-        for two in names:
+        for two in train:
           print("##", two, one)
           aft = [two]
-          train0,train1 = explore(dir='Data/Jureczko/', name=two)
-          rfTrain, test  = explore(dir='Data/Jureczko/', name=one)
+        #   train0,train1 = explore(dir='Data/Jureczko/', name=two)
+        #   rfTrain, test  = explore(dir='Data/Jureczko/', name=one)
+          set_trace()
           train = list(set([t for t in train0+train1 if not t in test]))
-          # set_trace()
           for _ in xrange(10):
             _, new = planners(train, test, rftrain = rfTrain, justDeltas=False)
             aft.append(new)
@@ -238,8 +240,8 @@ class mccabe:
       rdivDemo(E0)
 
 if __name__=='__main__':
-  accuracy().main()
-  # cross().improve1()
+  # accuracy().main()
+  cross().improve1()
   # mccabe().improve()
   # mccabe().acc()
   # temporal().improve()
