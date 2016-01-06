@@ -79,29 +79,6 @@ class cross:
           e.append(aft)
         rdivDemo(e)
 
-  # def accuracy(self):
-  #   """
-  #   Learn from all other projects. Compare the results.
-  #   :return:
-  #   """
-  #   names=['ant', 'ivy', 'jedit', 'lucene', 'poi']
-  #   for planners in [xtree]:#, method1, method2, method3]:
-  #     for one in names:
-  #       e=[]
-  #       for two in names:
-  #         print("##", one)
-  #         aft = [two]
-  #         train = csv2DF(explore(dir='Data/Jureczko/', name=two)[0])
-  #         test  = csv2DF(explore(dir='Data/Jureczko/', name=one)[0])
-  #         for _ in xrange(10):
-  #           actual, predicted = rforest(train, test, bin=True, regress=False)
-  #
-  #           _, new = planners(train, test, justDeltas=False)
-  #           aft.append(new)
-  #           # set_trace()
-  #         e.append(aft)
-  #       rdivDemo(e)
-
   def deltas(self):
     from collections import Counter
 
