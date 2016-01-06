@@ -61,6 +61,7 @@ class cross:
     """
     # names=['ant', 'ivy', 'jedit', 'lucene', 'poi']
     train,test = explore(dir='Data/Jureczko/')
+    set_trace()
     for planners in [xtree]:#, method1, method2, method3]:
       for one in test:
         e=[]
