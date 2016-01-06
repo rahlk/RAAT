@@ -1,16 +1,16 @@
 from __future__ import division, print_function
-from rf import rf
+from model import rf
 import numpy as np
 import random
 from time import time
 from pdb import set_trace
 
 class settings:
-  iter=50,
-  N=100,
-  f=0.5,
-  cf=0,
-  maxIter=100,
+  iter=50
+  N=100
+  f=0.5
+  cf=0
+  maxIter=100
   lives=10
 
 def flatten(x):
@@ -51,7 +51,10 @@ def de0(model, new=[], pop=int(1e4), iter=1000, lives=5, settings=settings):
 
   def extrapolate(current, l1, l2, l3):
     def extrap(i,a,x,y,z):
-      return (max(model.dec_lim[i][0], min(model.dec_lim[i][1], x + settings.f * (z - y)))) if random.random()>settings.cf else a
+      try:
+        return max(model.dec_lim[i][0], min(model.dec_lim[i][1], x + settings.f * (z - y))) # if random.random()>settings.cf else a
+      except:
+        set_trace()
     return [extrap(i, a,x,y,z) for i, a, x, y, z in zip(range(model.n_dec), current, l3, l1, l2)]
 
   def one234(one, pop):
@@ -62,29 +65,52 @@ def de0(model, new=[], pop=int(1e4), iter=1000, lives=5, settings=settings):
   while lives > 0 and iter>0:
     better = False
     xbest = random.choice(frontier)
+    xbestVal = model.solve(xbest)
+    iter-=1
+    # print(iter)
     for pos in xrange(len(frontier)):
-      iter -= 1
+      # print(iter)
       lives -= 1
+      t=time()
       now, l1, l2, l3 = one234(frontier[pos], frontier)
+      # print(time()-t)
       # set_trace()
+      t=time()
       new = extrapolate(now, l1, l2, l3)
+      # print(time()-t)
+      t=time()
       newVal=model.solve(new)
+      # print(time()-t)
+      t=time()
       oldVal=model.solve(now)
+      # print(time()-t)
       # print(iter, lives)
+      t=time()
       if cdom(newVal, oldVal):
         frontier.pop(pos)
         frontier.insert(pos, new)
         lives += 1
-      elif cdom(model.solve(frontier[pos]), model.solve(new)):
+        if cdom(newVal, xbestVal):
+          xbest=new
+      elif cdom(oldVal, newVal):
         better = False
+        if cdom(oldVal, xbestVal):
+          xbest=now
+        # print(oldVal, newVal)
       else:
         frontier.append(new)
         lives += 1
+        if cdom(newVal, xbestVal):
+          xbest=new
+      # print(time()-t)
 
-  return sorted(frontier, key=lambda F: model.solve(F))[-1]
+  # print([model.solve(f) for f in frontier])
+  # set_trace()
+  return xbest#sorted(frontier, key=lambda F: model.solve(F))[-1]
+  # return sorted(frontier, key=lambda F: model.solve(F))[-1]
 
 def tuner(data):
   if len(data)==1:
     return None
   else:
-    return de0(model = rf(data=data),pop=10, iter=100)
+    return de0(model = rf(data=data, obj=-1),pop=10, iter=100)

@@ -9,7 +9,7 @@ from stats import ABCD
 from misc import *
 from pdb import set_trace
 
-def SMOTE(data=None, atleast=50, atmost=100, k=5, resample=False):
+def SMOTE(data=None, atleast=100, atmost=200, k=5, resample=False):
   "Synthetic Minority Oversampling Technique"
   def knn(a,b):
     return sorted(b, key=lambda F: euclidean(a[:-1], F[:-1]))
@@ -81,20 +81,22 @@ def rforest(train, test, tunings=None, smoteit=True, bin=True, regress=False):
     except: set_trace()
   if not tunings:
     if regress:
-      clf = RandomForestRegressor(n_estimators=100, random_state=1)
+      clf = RandomForestRegressor(n_estimators=100, random_state=1, warm_start=True)
     else:
-      clf = RandomForestClassifier(n_estimators=100, random_state=1)
+      clf = RandomForestClassifier(n_estimators=100, random_state=1, warm_start=True)
   else:
     if regress:
       clf = RandomForestRegressor(n_estimators=int(tunings[0]),
                                    max_features=tunings[1] / 100,
                                    min_samples_leaf=int(tunings[2]),
-                                   min_samples_split=int(tunings[3]))
+                                   min_samples_split=int(tunings[3]),
+                                   warm_start=True)
     else:
       clf = RandomForestClassifier(n_estimators=int(tunings[0]),
                                    max_features=tunings[1] / 100,
                                    min_samples_leaf=int(tunings[2]),
-                                   min_samples_split=int(tunings[3]))
+                                   min_samples_split=int(tunings[3]),
+                                   warm_start=True)
   features = train.columns[:-1]
   klass = train[train.columns[-1]]
   # set_trace()

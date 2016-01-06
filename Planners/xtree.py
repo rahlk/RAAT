@@ -46,7 +46,7 @@ class changes():
 
 class patches:
 
-  def __init__(i,train,test,trainDF,testDF,rfTrain,tree=None,config=False):
+  def __init__(i,train,test,trainDF,testDF,rfTrain,tree=None,tunings=None,config=False):
     i.train=train
     i.trainDF = trainDF
     i.rftrain = rfTrain
@@ -55,7 +55,7 @@ class patches:
     i.config=config
     i.tree=tree
     i.change =[]
-    i.tunings = tuner(i.rftrain)
+    i.tunings = tunings#if tunings else tuner(i.rftrain)
 
   def leaves(i, node):
     """
@@ -143,7 +143,7 @@ class patches:
     else:
       return i.testDF.columns[:-1], i.change
 
-def xtree(train, test, rftrain=None, config=False,justDeltas=False):
+def xtree(train, test, rftrain=None, config=False,tunings=None, justDeltas=False):
   "XTREE"
   if config:
     # set_trace()
@@ -151,7 +151,7 @@ def xtree(train, test, rftrain=None, config=False,justDeltas=False):
     shuffle(data)
     train_DF, test_DF=data[:int(len(data)/2)], data[int(len(data)/2):].reset_index(drop=True)
     tree = pyC45.dtree2(train_DF)
-    patch = patches(train=train, test=test, trainDF=train_DF, testDF=test_DF, tree=tree, config=True)
+    patch = patches(train=train, test=test, trainDF=train_DF, testDF=test_DF, tree=tree, tunings=tunings, config=True)
     return patch.main(justDeltas=justDeltas)[1]
     # set_trace()
 
@@ -162,7 +162,7 @@ def xtree(train, test, rftrain=None, config=False,justDeltas=False):
     test_DF = csv2DF(test)
     tree = pyC45.dtree(train_DF)
     # set_trace()
-    patch = patches(train=train, test=test, trainDF=train_DF, testDF=test_DF, rfTrain=rftrain, tree=tree)
+    patch = patches(train=train, test=test, trainDF=train_DF, testDF=test_DF, rfTrain=rftrain, tunings=tunings, tree=tree)
     return patch.main(justDeltas=justDeltas)
 
 if __name__ == '__main__':

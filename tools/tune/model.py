@@ -24,7 +24,7 @@ class rf:
     i.train = csv2DF(data[:-1], toBin=True)
     i.test = csv2DF([data[-1]], toBin=True)
     i.n_obj = obj # 2=precision
-    i.dec_lim = [(50, 150)  # n_estimators
+    i.dec_lim = [(10, 100)  # n_estimators
                 , (1, 100)  # max_features
                 , (1, 10)   # min_samples_leaf
                 , (2, 10)   # min_samples_split
@@ -36,7 +36,7 @@ class rf:
              ] for _ in xrange(n)]
 
   def solve(i,dec):
-    actual, predicted = rforest(i.train, i.test, tunings=dec, smoteit=True)
+    actual, predicted = rforest(i.train, i.test, tunings=dec, smoteit=False)
     abcd = ABCD(before=actual, after=predicted)
     qual = np.array([k.stats()[i.n_obj] for k in abcd()])
     # set_trace()
