@@ -148,10 +148,10 @@ class accuracy:
       Pf0 = np.array([k.stats()[1] for k in abcd()])
       # set_trace()
       G.append(F[0])
-      say(tr[0].split('/')[-2]+', %0.2f, %0.2f'%(Pd0[1], 1-Pf0[1]))
+      say(tr[0].split('/')[-2]+', %0.2f, %0.2f\t'%(Pd0[1], 1-Pf0[1]))
 
       # Tune+SMOTE
-      tunings = None#tuner(tr)
+      tunings = tuner(tr)
       smote= True
       actual, preds = rforest(tr, te, tunings=tunings, smoteit=smote)
       abcd = ABCD(before=actual, after=preds)
@@ -182,7 +182,7 @@ class accuracy:
       G =[tr[0].split('/')[-2]]
       # for _ in xrange(1):
       tunings = None #tuner(tr)
-      smote= False
+      smote= True
       # tunings = tuner(tr)
       # set_trace()
       actual, preds = rforest(tr, te, tunings=tunings, smoteit=smote)
@@ -285,7 +285,8 @@ class mccabe:
       rdivDemo(E0)
 
 if __name__=='__main__':
-  accuracy().SVM()
+  # accuracy().SVM()
+  accuracy().RF()
   cross().improve1()
   # mccabe().improve()
   # mccabe().acc()

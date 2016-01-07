@@ -14,7 +14,7 @@ import warnings
 from time import time
 warnings.filterwarnings('ignore')
 
-def SMOTE(data=None, atleast=5, atmost=10, k=1, resample=False):
+def SMOTE(data=None, atleast=50, atmost=100, k=5, resample=False):
   "Synthetic Minority Oversampling Technique"
 
   def knn(a,b):
@@ -23,7 +23,7 @@ def SMOTE(data=None, atleast=5, atmost=10, k=1, resample=False):
     tree = BallTree(b)
     __, indx = tree.query(a[:-1], k=6)
 
-    return [b[i] for i in indx[1:]]
+    return [b[i] for i in indx]
     # set_trace()
     # return sorted(b, key=lambda F: euclidean(a[:-1], F[:-1]))
 
@@ -33,23 +33,25 @@ def SMOTE(data=None, atleast=5, atmost=10, k=1, resample=False):
     return sorted(b, key=lambda F: euclidean(a[:-1], F[:-1]))
 
   def extrapolate(one, two):
+    # t=time()
     new = len(one)*[None]
-    new[:-1] = [min(a, b) + rand(0,1) * (abs(a - b)) for
+    new[:-1] = [a + rand(0,1) * (b-a) for
                      a, b in zip(one[:-1], two[:-1])]
     new[-1] = int(one[-1])
     return new
 
-  def populate(data):
-    newData = []
-    for _ in xrange(atleast):
-      for one in data:
-        neigh = knn(one, data)[1:k + 1]
-        try:
-          two = choice(neigh)
-        except IndexError:
-          two = one
-        newData.append(extrapolate(one, two))
-    return [choice(newData) for _ in xrange(atleast)]
+  def populate(data, atleast):
+    t=time()
+    newData = [dd.tolist() for dd in data]
+    for _ in xrange(atleast-len(newData)):
+      one = choice(data)
+      neigh = knn(one, data)[1:k + 1]
+      try:
+        two = choice(neigh)
+      except IndexError:
+        two = one
+      newData.append(extrapolate(one, two))
+    return newData
 
   def populate2(data1, data2):
     newData = []
@@ -64,29 +66,31 @@ def SMOTE(data=None, atleast=5, atmost=10, k=1, resample=False):
     return [choice(newData) for _ in xrange(atleast)]
 
   def depopulate(data):
-    if resample:
-      newer = []
-      for _ in xrange(atmost):
-        orig = choice(data)
-        newer.append(extrapolate(orig, knn(orig, data)[1]))
-      return newer
-    else:
+    # if resample:
+    #   newer = []
+    #   for _ in xrange(atmost):
+    #     orig = choice(data)
+    #     newer.append(extrapolate(orig, knn(orig, data)[1]))
+    #   return newer
+    # else:
       return [choice(data).tolist() for _ in xrange(atmost)]
 
   newCells = []
   # rseed(1)
   klass = lambda df: df[df.columns[-1]]
   count = Counter(klass(data))
-  atleast=atmost=int(1*max([count[k] for k in count.keys()]))
+  atleast=int(4*max([count[k] for k in count.keys()]))
+  atmost=int(2*max([count[k] for k in count.keys()]))
+  major, minor = count.keys()
   # set_trace()
   for u in count.keys():
-    if count[u] < atleast:
-      newCells.extend(populate([r for r in data.as_matrix() if r[-1] == u]))
-    if count[u] > atmost:
-      newCells.extend(depopulate([r for r in data.as_matrix() if r[-1] == u]))
+    if u==minor:
+      newCells.extend(populate([r for r in data.as_matrix() if r[-1] == u], atleast=atleast))
+    if u==major:
+      newCells.extend(populate([r for r in data.as_matrix() if r[-1] == u], atleast=atmost))
     else:
       newCells.extend([r.tolist() for r in data.as_matrix() if r[-1] == u])
-
+  # set_trace()
   return pd.DataFrame(newCells, columns=data.columns)
 
 def _smote():

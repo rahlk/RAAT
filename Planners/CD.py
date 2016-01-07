@@ -5,7 +5,7 @@ from __future__ import print_function, division
 import sys
 sys.path.append('..')
 from tools.sk import *
-from tools.rforest import *
+from tools.oracle import *
 from tools.where import where
 from random import choice
 from scipy.spatial.distance import euclidean as edist
