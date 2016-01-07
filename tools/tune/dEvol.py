@@ -113,4 +113,4 @@ def tuner(data):
   if len(data)==1:
     return None
   else:
-    return de0(model = rf(data=data, obj=-1),pop=10, iter=100)
+    return de0(model = rf(data=data, obj=-2),pop=10, iter=100)

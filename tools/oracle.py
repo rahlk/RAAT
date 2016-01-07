@@ -8,10 +8,28 @@ import numpy as np
 from stats import ABCD
 from misc import *
 from pdb import set_trace
+from sklearn.neighbors import NearestNeighbors, BallTree, KDTree
+from sklearn.svm import SVC, SVR
+import warnings
+from time import time
+warnings.filterwarnings('ignore')
 
-def SMOTE(data=None, atleast=100, atmost=200, k=5, resample=False):
+def SMOTE(data=None, atleast=5, atmost=10, k=1, resample=False):
   "Synthetic Minority Oversampling Technique"
+
   def knn(a,b):
+    "k nearest neighbors"
+    b=np.array([bb[:-1] for bb in b])
+    tree = BallTree(b)
+    __, indx = tree.query(a[:-1], k=6)
+
+    return [b[i] for i in indx[1:]]
+    # set_trace()
+    # return sorted(b, key=lambda F: euclidean(a[:-1], F[:-1]))
+
+  def kfn(me,my_lot,others):
+    "k farthest neighbors"
+    my_closest = None
     return sorted(b, key=lambda F: euclidean(a[:-1], F[:-1]))
 
   def extrapolate(one, two):
@@ -33,6 +51,18 @@ def SMOTE(data=None, atleast=100, atmost=200, k=5, resample=False):
         newData.append(extrapolate(one, two))
     return [choice(newData) for _ in xrange(atleast)]
 
+  def populate2(data1, data2):
+    newData = []
+    for _ in xrange(atleast):
+      for one in data1:
+        neigh = kfn(one, data)[1:k + 1]
+        try:
+          two = choice(neigh)
+        except IndexError:
+          two = one
+        newData.append(extrapolate(one, two))
+    return [choice(newData) for _ in xrange(atleast)]
+
   def depopulate(data):
     if resample:
       newer = []
@@ -44,14 +74,15 @@ def SMOTE(data=None, atleast=100, atmost=200, k=5, resample=False):
       return [choice(data).tolist() for _ in xrange(atmost)]
 
   newCells = []
-  rseed(1)
+  # rseed(1)
   klass = lambda df: df[df.columns[-1]]
   count = Counter(klass(data))
-
+  atleast=atmost=int(1*max([count[k] for k in count.keys()]))
+  # set_trace()
   for u in count.keys():
-    if count[u] <= atleast:
+    if count[u] < atleast:
       newCells.extend(populate([r for r in data.as_matrix() if r[-1] == u]))
-    if count[u] >= atmost:
+    if count[u] > atmost:
       newCells.extend(depopulate([r for r in data.as_matrix() if r[-1] == u]))
     else:
       newCells.extend([r.tolist() for r in data.as_matrix() if r[-1] == u])
@@ -77,8 +108,8 @@ def rforest(train, test, tunings=None, smoteit=True, bin=True, regress=False):
     test = csv2DF(test, as_mtx=False, toBin=True)
 
   if smoteit:
-    try: train = SMOTE(train, resample=True)
-    except: set_trace()
+    train = SMOTE(train, resample=True)
+    # except: set_trace()
   if not tunings:
     if regress:
       clf = RandomForestRegressor(n_estimators=100, random_state=1, warm_start=True)
@@ -105,6 +136,39 @@ def rforest(train, test, tunings=None, smoteit=True, bin=True, regress=False):
   try: preds = clf.predict(test[test.columns[:-1]])
   except: set_trace()
   return actual, preds
+
+def SVM(train, test, tunings=None, smoteit=True, bin=True, regress=False):
+  "SVM "
+  if not isinstance(train, pd.core.frame.DataFrame):
+    train = csv2DF(train, as_mtx=False, toBin=bin)
+
+  if not isinstance(test, pd.core.frame.DataFrame):
+    test = csv2DF(test, as_mtx=False, toBin=True)
+
+  if smoteit:
+    train = SMOTE(train, resample=True)
+    # except: set_trace()
+  if not tunings:
+    if regress:
+      clf = SVR()
+    else:
+      clf = SVC()
+  else:
+    if regress:
+      clf = SVR()
+    else:
+      clf = SVC()
+
+  features = train.columns[:-1]
+  klass = train[train.columns[-1]]
+  # set_trace()
+  clf.fit(train[features], klass)
+  actual = test[test.columns[-1]].as_matrix()
+  try: preds = clf.predict(test[test.columns[:-1]])
+  except: set_trace()
+  return actual, preds
+
+
 
 def _RF():
   dir = '../Data/Jureczko/'

@@ -6,7 +6,7 @@ from tools.sk import rdivDemo
 from tools.misc import explore, say
 from tools.stats import ABCD
 from tools.tune.dEvol import tuner
-
+from tools.oracle import *
 # Timing
 from time import time
 
@@ -125,10 +125,10 @@ class accuracy:
   def __init__(i):
     pass
 
-  def main(i):
+  def RF(i):
     train,test = explore(dir='Data/Jureczko/')
     # set_trace()
-    print("Train - Test, Pd, Pf")
+    print("Data, Pd, Pf")
     # print("# %s"%(te[0].split('/')[-2]))
     for tr,te in zip(train,test):
       E0, E1 = [],[]
@@ -137,18 +137,77 @@ class accuracy:
       Pf=[tr[0].split('/')[-2]]
       G =[tr[0].split('/')[-2]]
       # for _ in xrange(1):
-      tunings = tuner(tr)
+      tunings = None #tuner(tr)
+      smote= False
+      # tunings = tuner(tr)
       # set_trace()
-      actual, preds = rforest(tr, te, tunings=tunings)
+      actual, preds = rforest(tr, te, tunings=tunings, smoteit=smote)
       abcd = ABCD(before=actual, after=preds)
       F = np.array([k.stats()[-2] for k in abcd()])
       Pd0 = np.array([k.stats()[0] for k in abcd()])
       Pf0 = np.array([k.stats()[1] for k in abcd()])
       # set_trace()
       G.append(F[0])
-      say(tr[0].split('/')[-2]+' - '+te[0].split('/')[-2]+', %0.2f, %0.2f\n'%(Pd0[1], 1-Pf0[1]))
-      Pd.append(Pd0)
-      Pf.append(Pf0)
+      say(tr[0].split('/')[-2]+', %0.2f, %0.2f'%(Pd0[1], 1-Pf0[1]))
+
+      # Tune+SMOTE
+      tunings = None#tuner(tr)
+      smote= True
+      actual, preds = rforest(tr, te, tunings=tunings, smoteit=smote)
+      abcd = ABCD(before=actual, after=preds)
+      F = np.array([k.stats()[-2] for k in abcd()])
+      Pd0 = np.array([k.stats()[0] for k in abcd()])
+      Pf0 = np.array([k.stats()[1] for k in abcd()])
+      # set_trace()
+      G.append(F[0])
+      say(', %0.2f, %0.2f\n'%(Pd0[1], 1-Pf0[1]))
+
+      # Pd.append(Pd0)
+      # Pf.append(Pf0)
+      # E0.append(G)
+      # E1.append(Pf)
+      # rdivDemo(E0)
+      # rdivDemo(E1)
+    set_trace()
+  def SVM(i):
+    train,test = explore(dir='Data/Jureczko/')
+    # set_trace()
+    print("Data, Pd, Pf")
+    # print("# %s"%(te[0].split('/')[-2]))
+    for tr,te in zip(train,test):
+      E0, E1 = [],[]
+      # for tr in train:
+      Pd=[tr[0].split('/')[-2]]
+      Pf=[tr[0].split('/')[-2]]
+      G =[tr[0].split('/')[-2]]
+      # for _ in xrange(1):
+      tunings = None #tuner(tr)
+      smote= False
+      # tunings = tuner(tr)
+      # set_trace()
+      actual, preds = rforest(tr, te, tunings=tunings, smoteit=smote)
+      abcd = ABCD(before=actual, after=preds)
+      F = np.array([k.stats()[-2] for k in abcd()])
+      Pd0 = np.array([k.stats()[0] for k in abcd()])
+      Pf0 = np.array([k.stats()[1] for k in abcd()])
+      # set_trace()
+      G.append(F[0])
+      say(tr[0].split('/')[-2]+', %0.2f, %0.2f\n'%(Pd0[1], 1-Pf0[1]))
+      #
+      # # Tune+SMOTE
+      # tunings = None#tuner(tr)
+      # smote= True
+      # actual, preds = rforest(tr, te, tunings=tunings, smoteit=smote)
+      # abcd = ABCD(before=actual, after=preds)
+      # F = np.array([k.stats()[-2] for k in abcd()])
+      # Pd0 = np.array([k.stats()[0] for k in abcd()])
+      # Pf0 = np.array([k.stats()[1] for k in abcd()])
+      # # set_trace()
+      # G.append(F[0])
+      # say(', %0.2f, %0.2f\n'%(Pd0[1], 1-Pf0[1]))
+
+      # Pd.append(Pd0)
+      # Pf.append(Pf0)
       # E0.append(G)
       # E1.append(Pf)
       # rdivDemo(E0)
@@ -226,7 +285,7 @@ class mccabe:
       rdivDemo(E0)
 
 if __name__=='__main__':
-  accuracy().main()
+  accuracy().SVM()
   cross().improve1()
   # mccabe().improve()
   # mccabe().acc()
