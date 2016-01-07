@@ -29,7 +29,7 @@ def flatten(x):
 def de0(model, new=[], pop=int(1e4), iter=1000, lives=5, settings=settings):
   frontier = model.generate(pop)
 
-  def cdom(x, y, better='more'):
+  def cdom(x, y, better=['more','more']):
 
     def loss1(i,x,y):
       return (x - y) if better[i] == 'less' else (y - x)
@@ -47,6 +47,13 @@ def de0(model, new=[], pop=int(1e4), iter=1000, lives=5, settings=settings):
       return x<y if better=='less' else x>y
     else:
       return loss(x,y) < loss(y,x)
+
+  def bdom(x, y, better=['more','more']):
+    if not isinstance(x,list):
+      return x<y if better=='less' else x>y
+    else:
+      return x[0]>0.6 and x[1]>0.6
+      # return x[0]>y[0] and x[1]>y[1]
 
 
   def extrapolate(current, l1, l2, l3):
@@ -86,15 +93,15 @@ def de0(model, new=[], pop=int(1e4), iter=1000, lives=5, settings=settings):
       # print(time()-t)
       # print(iter, lives)
       t=time()
-      if cdom(newVal, oldVal):
+      if bdom(newVal, oldVal):
         frontier.pop(pos)
         frontier.insert(pos, new)
         lives += 1
-        if cdom(newVal, xbestVal):
+        if bdom(newVal, xbestVal):
           xbest=new
-      elif cdom(oldVal, newVal):
+      elif bdom(oldVal, newVal):
         better = False
-        if cdom(oldVal, xbestVal):
+        if bdom(oldVal, xbestVal):
           xbest=now
         # print(oldVal, newVal)
       else:
@@ -105,12 +112,19 @@ def de0(model, new=[], pop=int(1e4), iter=1000, lives=5, settings=settings):
       # print(time()-t)
 
   # print([model.solve(f) for f in frontier])
-  # set_trace()
-  return xbest#sorted(frontier, key=lambda F: model.solve(F))[-1]
+  def best(aa):
+    one,two = model.solve(aa)
+    return 2 if one>0.6 and two>0.6 else 1 if one>0.6 or two>0.6 else 0
+  best1 = [ff for ff in frontier if best(ff)>1]
+  # print(model.solve(sorted(best1, key=lambda F: model.solve(F)[0])[-1]))
+  if len(best1)==0:
+    set_trace()
+  return sorted(best1, key=lambda F: best(F))[-1]
+  # return xbest#sorted(frontier, key=lambda F: model.solve(F))[-1]
   # return sorted(frontier, key=lambda F: model.solve(F))[-1]
 
 def tuner(data):
   if len(data)==1:
     return None
   else:
-    return de0(model = rf(data=data, obj=-2),pop=10, iter=100)
+    return de0(model = rf(data=data, obj=-1),pop=10, iter=100)

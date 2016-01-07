@@ -43,15 +43,18 @@ def SMOTE(data=None, atleast=50, atmost=100, a=2,b=1, k=5, resample=False):
   def populate(data, atleast):
     t=time()
     newData = [dd.tolist() for dd in data]
-    for _ in xrange(atleast-len(newData)):
-      one = choice(data)
-      neigh = knn(one, data)[1:k + 1]
-      try:
-        two = choice(neigh)
-      except IndexError:
-        two = one
-      newData.append(extrapolate(one, two))
-    return newData
+    if atleast-len(newData)<0:
+      return [choice(newData) for _ in xrange(atleast)]
+    else:
+      for _ in xrange(atleast-len(newData)):
+        one = choice(data)
+        neigh = knn(one, data)[1:k + 1]
+        try:
+          two = choice(neigh)
+        except IndexError:
+          two = one
+        newData.append(extrapolate(one, two))
+      return newData
 
   def populate2(data1, data2):
     newData = []
@@ -103,7 +106,7 @@ def _smote():
   # ---- ::DEBUG:: -----
   set_trace()
 
-def rforest(train, test, tunings=None, smoteit=True, fact = [1,0.5], bin=True, regress=False):
+def rforest(train, test, tunings=None, smoteit=True, bin=True, regress=False):
   "RF "
   if not isinstance(train, pd.core.frame.DataFrame):
     train = csv2DF(train, as_mtx=False, toBin=bin)
@@ -112,8 +115,12 @@ def rforest(train, test, tunings=None, smoteit=True, fact = [1,0.5], bin=True, r
     test = csv2DF(test, as_mtx=False, toBin=True)
 
   if smoteit:
-    train = SMOTE(train, a=fact[0], b=fact[1], resample=True)
+    if not tunings:
+      train = SMOTE(train, resample=True)
+    else:
+      train = SMOTE(train, a=tunings[-2], b=tunings[-1], resample=True)
     # except: set_trace()
+
   if not tunings:
     if regress:
       clf = RandomForestRegressor(n_estimators=100, random_state=1, warm_start=True)

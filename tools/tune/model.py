@@ -19,8 +19,8 @@ class rf:
   """
   Random Forest
   """
-  def __init__(i, data, obj=2,n_dec=5):
-    i.n_dec = 5
+  def __init__(i, data, obj=2,n_dec=7):
+    i.n_dec = n_dec
     i.train = csv2DF(data[:-1], toBin=True)
     i.test = csv2DF([data[-1]], toBin=True)
     i.n_obj = obj # 2=precision
@@ -29,8 +29,8 @@ class rf:
                 , (1, 10)   # min_samples_leaf
                 , (2, 10)   # min_samples_split
                 , (2, 50)   # max_leaf_nodes
-                , (0,  5)   # Minority sampling factor
-                , (0,  5)]  # Majority sampling factor
+                , (1,  2)   # Minority sampling factor
+                , (0,  1)]  # Majority sampling factor
 
   def generate(i,n):
     return [[uniform(i.dec_lim[indx][0]
@@ -38,11 +38,14 @@ class rf:
              ] for _ in xrange(n)]
 
   def solve(i,dec):
-    actual, predicted = rforest(i.train, i.test, tunings=dec[:-2],  smoteit=True, fact=dec[-2:])
+    actual, predicted = rforest(i.train, i.test, tunings=dec, smoteit=True)
     abcd = ABCD(before=actual, after=predicted)
-    qual = np.array([k.stats()[i.n_obj] for k in abcd()])
+    qual = np.array([k.stats()[1:3] for k in abcd()])
+    pf=qual[1][1]
+    out=1-pf if pf>0.6 else 0
     # set_trace()
-    return qual[1]
+    return out, out
+    # return [qual[0][1], qual[1][1]]
 
 if __name__=='__main__':
   problem = DTLZ2(30,3)
