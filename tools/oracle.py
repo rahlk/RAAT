@@ -14,7 +14,7 @@ import warnings
 from time import time
 warnings.filterwarnings('ignore')
 
-def SMOTE(data=None, atleast=50, atmost=100, k=5, resample=False):
+def SMOTE(data=None, atleast=50, atmost=100, a=2,b=1, k=5, resample=False):
   "Synthetic Minority Oversampling Technique"
 
   def knn(a,b):
@@ -79,8 +79,8 @@ def SMOTE(data=None, atleast=50, atmost=100, k=5, resample=False):
   # rseed(1)
   klass = lambda df: df[df.columns[-1]]
   count = Counter(klass(data))
-  atleast=int(4*max([count[k] for k in count.keys()]))
-  atmost=int(2*max([count[k] for k in count.keys()]))
+  atleast=int(a*max([count[k] for k in count.keys()]))
+  atmost=int(b*max([count[k] for k in count.keys()]))
   major, minor = count.keys()
   # set_trace()
   for u in count.keys():
@@ -103,7 +103,7 @@ def _smote():
   # ---- ::DEBUG:: -----
   set_trace()
 
-def rforest(train, test, tunings=None, smoteit=True, bin=True, regress=False):
+def rforest(train, test, tunings=None, smoteit=True, fact = [1,0.5], bin=True, regress=False):
   "RF "
   if not isinstance(train, pd.core.frame.DataFrame):
     train = csv2DF(train, as_mtx=False, toBin=bin)
@@ -112,7 +112,7 @@ def rforest(train, test, tunings=None, smoteit=True, bin=True, regress=False):
     test = csv2DF(test, as_mtx=False, toBin=True)
 
   if smoteit:
-    train = SMOTE(train, resample=True)
+    train = SMOTE(train, a=fact[0], b=fact[1], resample=True)
     # except: set_trace()
   if not tunings:
     if regress:

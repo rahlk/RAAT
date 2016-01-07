@@ -128,7 +128,8 @@ class accuracy:
   def RF(i):
     train,test = explore(dir='Data/Jureczko/')
     # set_trace()
-    print("Data, Pd, Pf")
+    print("Data,\t Pd,\t Pf,\t Pd,\t Pf")
+    print("\t,Naive,\t,\tTuned,\t,\t")
     # print("# %s"%(te[0].split('/')[-2]))
     for tr,te in zip(train,test):
       E0, E1 = [],[]
@@ -148,19 +149,19 @@ class accuracy:
       Pf0 = np.array([k.stats()[1] for k in abcd()])
       # set_trace()
       G.append(F[0])
-      say(tr[0].split('/')[-2]+', %0.2f, %0.2f\t'%(Pd0[1], 1-Pf0[1]))
+      say(tr[0].split('/')[-2]+'\t, %0.2f,\t %0.2f,\t'%(Pd0[1], 1-Pf0[1]))
 
       # Tune+SMOTE
       tunings = tuner(tr)
       smote= True
-      actual, preds = rforest(tr, te, tunings=tunings, smoteit=smote)
+      actual, preds = rforest(tr, te, tunings=tunings[:-2], fact=tunings[-2:], smoteit=smote)
       abcd = ABCD(before=actual, after=preds)
       F = np.array([k.stats()[-2] for k in abcd()])
       Pd0 = np.array([k.stats()[0] for k in abcd()])
       Pf0 = np.array([k.stats()[1] for k in abcd()])
       # set_trace()
       G.append(F[0])
-      say(', %0.2f, %0.2f\n'%(Pd0[1], 1-Pf0[1]))
+      say('%0.2f,\t %0.2f\n'%(Pd0[1], 1-Pf0[1]))
 
       # Pd.append(Pd0)
       # Pf.append(Pf0)

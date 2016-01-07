@@ -28,7 +28,9 @@ class rf:
                 , (1, 100)  # max_features
                 , (1, 10)   # min_samples_leaf
                 , (2, 10)   # min_samples_split
-                , (2, 50)]  # max_leaf_nodes
+                , (2, 50)   # max_leaf_nodes
+                , (0,  5)   # Minority sampling factor
+                , (0,  5)]  # Majority sampling factor
 
   def generate(i,n):
     return [[uniform(i.dec_lim[indx][0]
@@ -36,7 +38,7 @@ class rf:
              ] for _ in xrange(n)]
 
   def solve(i,dec):
-    actual, predicted = rforest(i.train, i.test, tunings=dec, smoteit=False)
+    actual, predicted = rforest(i.train, i.test, tunings=dec[:-2],  smoteit=True, fact=dec[-2:])
     abcd = ABCD(before=actual, after=predicted)
     qual = np.array([k.stats()[i.n_obj] for k in abcd()])
     # set_trace()
