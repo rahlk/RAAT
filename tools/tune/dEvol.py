@@ -118,7 +118,7 @@ def de0(model, new=[], pop=int(1e4), iter=1000, lives=5, settings=settings):
   best1 = [ff for ff in frontier if best(ff)>1]
   # print(model.solve(sorted(best1, key=lambda F: model.solve(F)[0])[-1]))
   if len(best1)==0:
-    set_trace()
+    return sorted(frontier, key=lambda F: model.solve(F)[0])[-1]
   return sorted(best1, key=lambda F: model.solve(F)[0])[-1]
   # return xbest#sorted(frontier, key=lambda F: model.solve(F))[-1]
   # return sorted(frontier, key=lambda F: model.solve(F))[-1]

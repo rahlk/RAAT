@@ -96,6 +96,7 @@ def parallel():
   n_proc = len(train)
   p=Pool(processes=n_proc)
   collect.append(p.map(RF, range(n_proc)))
+  for cc in collect: print(cc)
   set_trace()
 
 if __name__=='__main__':
