@@ -9,7 +9,7 @@ from tools.tune.dEvol import tuner
 from tools.oracle import *
 # Timing
 from time import time
-
+from logo import logo
 class temporal:
   def __init__(self):
     pass
