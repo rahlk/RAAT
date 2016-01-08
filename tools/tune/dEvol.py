@@ -52,8 +52,8 @@ def de0(model, new=[], pop=int(1e4), iter=1000, lives=5, settings=settings):
     if not isinstance(x,list):
       return x<y if better=='less' else x>y
     else:
-      return x[0]>0.6 and x[1]>0.6
-      # return x[0]>y[0] and x[1]>y[1]
+      # return x[0]>0.6 and x[1]>0.6
+      return x[0]>y[0] and x[1]>y[1]
 
 
   def extrapolate(current, l1, l2, l3):
