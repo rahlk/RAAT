@@ -114,12 +114,12 @@ def de0(model, new=[], pop=int(1e4), iter=1000, lives=5, settings=settings):
   # print([model.solve(f) for f in frontier])
   def best(aa):
     one,two = model.solve(aa)
-    return 2 if one>0.6 and two>0.6 else 1 if one>0.6 or two>0.6 else 0
+    return 2 if one>0.3 and two>0.3 else 1 if one>0.3 or two>0.3 else 0
   best1 = [ff for ff in frontier if best(ff)>1]
   # print(model.solve(sorted(best1, key=lambda F: model.solve(F)[0])[-1]))
   if len(best1)==0:
     set_trace()
-  return sorted(best1, key=lambda F: best(F))[-1]
+  return sorted(best1, key=lambda F: model.solve(F)[0])[-1]
   # return xbest#sorted(frontier, key=lambda F: model.solve(F))[-1]
   # return sorted(frontier, key=lambda F: model.solve(F))[-1]
 

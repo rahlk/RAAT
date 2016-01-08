@@ -138,7 +138,7 @@ class accuracy:
       Pf=[tr[0].split('/')[-2]]
       G =[tr[0].split('/')[-2]]
       tunings = tuner(tr)
-      for _ in xrange(10):
+      for _ in xrange(1):
         actual, preds = rforest(tr, te, tunings=None, smoteit=False)
         abcd = ABCD(before=actual, after=preds)
         F = np.array([k.stats()[-2] for k in abcd()])
