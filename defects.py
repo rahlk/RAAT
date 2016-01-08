@@ -71,12 +71,11 @@ class cross:
           print("##", "Train: ", two[0].split('/')[-2],"Test: ", one[0].split('/')[-2])
           aft = [two[0].split('/')[-2]]
           rfTrain=train[i]
-        #   set_trace()
+          set_trace()
           t=time()
-          params = None
-          # params = tuner(two)
+          # params = None
+          params = tuner(rfTrain)
           # print("Tuning time: %0.2f"%(time()-t))
-
           t=time()
           for _ in xrange(1):
             _, new = planners(two, one, rftrain = rfTrain
@@ -282,7 +281,7 @@ class mccabe:
 
 if __name__=='__main__':
   # accuracy().SVM()
-  accuracy().RF()
+  # accuracy().RF()
   cross().improve1()
   # mccabe().improve()
   # mccabe().acc()
