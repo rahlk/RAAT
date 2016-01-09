@@ -43,6 +43,7 @@ def RF(indx):
   F = np.array([k.stats()[-2] for k in abcd()])
   Pd0 = np.array([k.stats()[0] for k in abcd()])
   Pf0 = np.array([k.stats()[1] for k in abcd()])
+  say(init+'%0.2f,\t %0.2f\n'%(Pd0[1], 1-Pf0[1]))
   return init+'%0.2f,\t %0.2f\n'%(Pd0[1], 1-Pf0[1])
 
 def SVM(indx):
@@ -83,6 +84,7 @@ def parallel():
 
 def serial():
   RF(0)
+  
 if __name__=='__main__':
   serial()
   # parallel()
