@@ -54,7 +54,7 @@ def de0(model, new=[], pop=int(1e4), iter=1000, lives=5, settings=settings):
     #   return x<y if better=='less' else x>y
     # else:
     #   # return x[0]>0.6 and x[1]>0.6
-      #print(x,y)
+    # print(x,y)
     return x[0]<y[0]
       #return x[0]>y[0] and x[1]>y[1]
 
