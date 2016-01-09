@@ -77,7 +77,7 @@ def de0(model, new=[], pop=int(1e4), iter=1000, lives=5, settings=settings):
     iter-=1
     # print(iter)
     for pos in xrange(len(frontier)):
-      print(len(frontier), pos)
+      # print(len(frontier), pos)
       lives -= 1
       # t=time()
       now, l1, l2, l3 = one234(frontier[pos], frontier)
