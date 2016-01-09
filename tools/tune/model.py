@@ -43,15 +43,15 @@ class rf:
     # print(time()-t)
     abcd = ABCD(before=actual, after=predicted)
     qual = np.array([k.stats() for k in abcd()])
-    set_trace()
-    pd=qual[0][1]
+    # set_trace()
+    pd=qual[1][0]
     pf=qual[1][1]
-    acc=qual[2][1]
-    prec=qual[3][1]
-    f1=qual[4][1]
-    g1=qual[5][1]
+    acc=qual[1][2]
+    prec=qual[1][3]
+    f1=qual[1][4]
+    g1=qual[1][5]
     # print(pf)
-    out=1-pf if pf>0.6 and pd>0.6 else 0
+    out=1-pf if pf>0.7 else 0
     # set_trace()
     return out
     # return [qual[0][1], qual[1][1]]
