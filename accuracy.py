@@ -85,7 +85,7 @@ def parallel():
   set_trace()
 
 def serial():
-  RF(-1)
+  RF(0)
   
 if __name__=='__main__':
   # serial()

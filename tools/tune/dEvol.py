@@ -54,8 +54,9 @@ def de0(model, new=[], pop=int(1e4), iter=1000, lives=5, settings=settings):
     #   return x<y if better=='less' else x>y
     # else:
     #   # return x[0]>0.6 and x[1]>0.6
-      # print(x,y)
-      return x[0]>y[0] and x[1]>y[1]
+      #print(x,y)
+    return x[0]<y[0]
+      #return x[0]>y[0] and x[1]>y[1]
 
   def extrapolate(current, l1, l2, l3):
     def extrap(i,a,x,y,z):
@@ -121,7 +122,7 @@ def de0(model, new=[], pop=int(1e4), iter=1000, lives=5, settings=settings):
   # print([model.solve(f) for f in frontier])
   def best(aa):
     one,two = model.solve(aa)
-    return 2 if one>0.3 and two>0.3 else 1 if one>0.3 or two>0.3 else 0
+    return 1 if one>0.3 and two>0.3 else 1 if one>0.3 or two>0.3 else 0
   best1 = [ff for ff in frontier if best(ff)>1]
   # print(model.solve(sorted(best1, key=lambda F: model.solve(F)[0])[-1]))
   if len(best1)==0:
