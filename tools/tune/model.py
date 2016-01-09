@@ -51,7 +51,8 @@ class rf:
     f1=qual[1][4]
     g1=qual[1][5]
     # print(pf)
-    out=1-pf if pf>0.6 else 0
+
+    out=1-pf if pf>0.7 else 0
     out1=1-pd if pd>0.6 else 0
     # set_trace()
     return [out,out1]
