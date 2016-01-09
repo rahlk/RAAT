@@ -53,7 +53,7 @@ class rf:
     # print(pf)
     out=1-pf if pf>0.7 else 0
     # set_trace()
-    return pf if pf>0.6 else 0, pd if pd>0.6 else 0
+    return [pf if pf>0.6 else 0, pd if pd>0.6 else 0]
     # return [qual[0][1], qual[1][1]]
 
 if __name__=='__main__':
