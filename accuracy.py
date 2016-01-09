@@ -84,5 +84,5 @@ def parallel():
 def serial():
   RF(0)
 if __name__=='__main__':
-  serial()
-  # parallel()
+  # serial()
+  parallel()
