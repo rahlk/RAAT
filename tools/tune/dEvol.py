@@ -54,7 +54,7 @@ def de0(model, new=[], pop=int(1e4), iter=1000, lives=5, settings=settings):
     #   return x<y if better=='less' else x>y
     # else:
     #   # return x[0]>0.6 and x[1]>0.6
-    # print(x,y)
+    print(x,y)
     return x[0]<y[0]
       #return x[0]>y[0] and x[1]>y[1]
 
@@ -74,7 +74,7 @@ def de0(model, new=[], pop=int(1e4), iter=1000, lives=5, settings=settings):
   while lives > 0 and iter>0:
     better = False
     xbest = random.choice(frontier)
-    xbestVal = 0#model.solve(xbest)
+    xbestVal = model.solve(xbest)
     iter-=1
     # print(iter)
     for pos in xrange(len(frontier)):
@@ -114,7 +114,7 @@ def de0(model, new=[], pop=int(1e4), iter=1000, lives=5, settings=settings):
         lives += 1
         if bdom(newVal, xbestVal):
           # print('Yes!')
-          lives=-10
+          # lives=-10
           xbest=new
           return xbest
       # print(time()-t)
