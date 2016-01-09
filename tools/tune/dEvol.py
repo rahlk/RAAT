@@ -55,7 +55,7 @@ def de0(model, new=[], pop=int(1e4), iter=1000, lives=5, settings=settings):
     # else:
     #   # return x[0]>0.6 and x[1]>0.6
       # print(x,y)
-      return x>y
+      return x[0]>y[0] and x[1]>y[1]
 
   def extrapolate(current, l1, l2, l3):
     def extrap(i,a,x,y,z):
