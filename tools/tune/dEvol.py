@@ -99,20 +99,20 @@ def de0(model, new=[], pop=int(1e4), iter=1000, lives=5, settings=settings):
         frontier.insert(pos, new)
         lives += 1
         if bdom(newVal, xbestVal):
-          print('Yes!')
+          # print('Yes!')
           xbest=new
           return xbest
       elif bdom(oldVal, newVal):
         better = False
         if bdom(oldVal, xbestVal):
-          print('Yes!')
+          # print('Yes!')
           xbest=new
           return xbest
         # print(oldVal, newVal)
       else:
         lives += 1
         if bdom(newVal, xbestVal):
-          print('Yes!')
+          # print('Yes!')
           lives=-10
           xbest=new
           return xbest
