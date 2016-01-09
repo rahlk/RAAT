@@ -35,6 +35,7 @@ def RF(indx):
   Pd0 = np.array([k.stats()[0] for k in abcd()])
   Pf0 = np.array([k.stats()[1] for k in abcd()])
   init = tr[0].split('/')[-2]+'\t, %0.2f,\t %0.2f,\t'%(Pd0[1], 1-Pf0[1])
+  # init1 = tr[0].split('/')[-2]+'\t, %0.2f,\t'%(F[1])
 
   # Tune+SMOTE
   smote= True
@@ -44,6 +45,7 @@ def RF(indx):
   Pd0 = np.array([k.stats()[0] for k in abcd()])
   Pf0 = np.array([k.stats()[1] for k in abcd()])
   say(init+'%0.2f,\t %0.2f\n'%(Pd0[1], 1-Pf0[1]))
+  # say(init1+'%0.2f\n'%(F[1]))
   return init+'%0.2f,\t %0.2f\n'%(Pd0[1], 1-Pf0[1])
 
 def SVM(indx):
