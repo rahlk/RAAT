@@ -46,7 +46,7 @@ class rf:
     pf=qual[1][1]
     pd=qual[0][1]
     # print(pf)
-    out=1-pf if pf>0.6 and pd>0.6 else 0
+    out=1-pf if pf>0.6 else 0 #and pd>0.6 else 0
     # set_trace()
     return out
     # return [qual[0][1], qual[1][1]]
