@@ -49,12 +49,13 @@ def de0(model, new=[], pop=int(1e4), iter=1000, lives=5, settings=settings):
       return loss(x,y) < loss(y,x)
 
   def bdom(x, y, better=['more','more']):
-    if not isinstance(x,list):
-      return x<y if better=='less' else x>y
-    else:
-      # return x[0]>0.6 and x[1]>0.6
-      return x[0]>y[0] and x[1]>y[1]
-
+    # if not isinstance(x,list):
+    #   print(x,y)
+    #   return x<y if better=='less' else x>y
+    # else:
+    #   # return x[0]>0.6 and x[1]>0.6
+      # print(x,y)
+      return x>y
 
   def extrapolate(current, l1, l2, l3):
     def extrap(i,a,x,y,z):
@@ -72,43 +73,49 @@ def de0(model, new=[], pop=int(1e4), iter=1000, lives=5, settings=settings):
   while lives > 0 and iter>0:
     better = False
     xbest = random.choice(frontier)
-    xbestVal = model.solve(xbest)
+    xbestVal = 0#model.solve(xbest)
     iter-=1
     # print(iter)
     for pos in xrange(len(frontier)):
-      # print(iter)
+      print(len(frontier), pos)
       lives -= 1
-      t=time()
+      # t=time()
       now, l1, l2, l3 = one234(frontier[pos], frontier)
       # print(time()-t)
       # set_trace()
-      t=time()
+      # t=time()
       new = extrapolate(now, l1, l2, l3)
       # print(time()-t)
-      t=time()
+      # t=time()
       newVal=model.solve(new)
       # print(time()-t)
-      t=time()
+      # t=time()
       oldVal=model.solve(now)
       # print(time()-t)
       # print(iter, lives)
-      t=time()
+      # t=time()
       if bdom(newVal, oldVal):
         frontier.pop(pos)
         frontier.insert(pos, new)
         lives += 1
         if bdom(newVal, xbestVal):
+          print('Yes!')
           xbest=new
+          return xbest
       elif bdom(oldVal, newVal):
         better = False
         if bdom(oldVal, xbestVal):
-          xbest=now
+          print('Yes!')
+          xbest=new
+          return xbest
         # print(oldVal, newVal)
       else:
-        frontier.append(new)
         lives += 1
-        if cdom(newVal, xbestVal):
+        if bdom(newVal, xbestVal):
+          print('Yes!')
+          lives=-10
           xbest=new
+          return xbest
       # print(time()-t)
 
   # print([model.solve(f) for f in frontier])
@@ -127,4 +134,4 @@ def tuner(data):
   if len(data)==1:
     return None
   else:
-    return de0(model = rf(data=data, obj=-1),pop=10, iter=100)
+    return de0(model = rf(data=data, obj=-1),pop=50, iter=10)

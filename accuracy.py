@@ -69,25 +69,7 @@ def SVM(indx):
     # set_trace()
     G.append(F[0])
     say(tr[0].split('/')[-2]+', %0.2f, %0.2f\n'%(Pd0[1], 1-Pf0[1]))
-    #
-    # # Tune+SMOTE
-    # tunings = None#tuner(tr)
-    # smote= True
-    # actual, preds = rforest(tr, te, tunings=tunings, smoteit=smote)
-    # abcd = ABCD(before=actual, after=preds)
-    # F = np.array([k.stats()[-2] for k in abcd()])
-    # Pd0 = np.array([k.stats()[0] for k in abcd()])
-    # Pf0 = np.array([k.stats()[1] for k in abcd()])
-    # # set_trace()
-    # G.append(F[0])
-    # say(', %0.2f, %0.2f\n'%(Pd0[1], 1-Pf0[1]))
 
-    # Pd.append(Pd0)
-    # Pf.append(Pf0)
-    # E0.append(G)
-    # E1.append(Pf)
-    # rdivDemo(E0)
-    # rdivDemo(E1)
   set_trace()
 
 def parallel():
@@ -99,5 +81,8 @@ def parallel():
   for cc in collect: print(cc)
   set_trace()
 
+def serial():
+  RF(0)
 if __name__=='__main__':
-  parallel()
+  serial()
+  # parallel()

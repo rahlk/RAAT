@@ -1,6 +1,6 @@
 from __future__ import division, print_function
 import os, sys, subprocess
-from time import sleep
+from time import time
 # Get the git root directory
 root=repo_dir = subprocess.Popen(['git'
                                       ,'rev-parse'
@@ -38,13 +38,16 @@ class rf:
              ] for _ in xrange(n)]
 
   def solve(i,dec):
+    # t=time()
     actual, predicted = rforest(i.train, i.test, tunings=dec, smoteit=True)
+    # print(time()-t)
     abcd = ABCD(before=actual, after=predicted)
     qual = np.array([k.stats()[1:3] for k in abcd()])
     pf=qual[1][1]
+    # print(pf)
     out=1-pf if pf>0.6 else 0
     # set_trace()
-    return out, out
+    return out
     # return [qual[0][1], qual[1][1]]
 
 if __name__=='__main__':
