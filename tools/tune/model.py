@@ -25,12 +25,12 @@ class rf:
     i.test = csv2DF([data[-1]], toBin=True)
     i.n_obj = obj # 2=precision
     i.dec_lim = [(10, 100)  # n_estimators
-                , (1, 100)  # max_features
-                , (1, 10)   # min_samples_leaf
-                , (2, 10)   # min_samples_split
-                , (2, 50)   # max_leaf_nodes
-                , (1,  2)   # Minority sampling factor
-                , (0,  1)]  # Majority sampling factor
+                , (10, 10)  # max_features
+                , (5, 5)   # min_samples_leaf
+                , (5, 5)   # min_samples_split
+                , (5, 5)   # max_leaf_nodes
+                , (0,  4)   # Minority sampling factor
+                , (0,  2)]  # Majority sampling factor
 
   def generate(i,n):
     return [[uniform(i.dec_lim[indx][0]
