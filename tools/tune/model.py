@@ -24,8 +24,8 @@ class rf:
     i.train = csv2DF(data[:-1], toBin=True)
     i.test = csv2DF([data[-1]], toBin=True)
     i.n_obj = obj # 2=precision
-    i.dec_lim = [(10, 100)  # n_estimators
-                , (10, 10)  # max_features
+    i.dec_lim = [(10, 10)  # n_estimators
+                , (1, 10)  # max_features
                 , (5, 5)   # min_samples_leaf
                 , (5, 5)   # min_samples_split
                 , (5, 5)   # max_leaf_nodes
