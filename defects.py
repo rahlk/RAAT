@@ -69,9 +69,9 @@ def parCross(indx):
   train,test = explore(dir='Data/Jureczko/')
   one = test[indx]
   e=[]
-  say(two[0].split('/')[-2]+" - "+one[0].split('/')[-2])
   for two in train:
-    print("##", "Train: ", two[0].split('/')[-2],"Test: ", one[0].split('/')[-2])
+    # say(two[0].split('/')[-2]+" - "+one[0].split('/')[-2])
+    # print("##", "Train: ", two[0].split('/')[-2],"Test: ", one[0].split('/')[-2])
     aft = [two[0].split('/')[-2]+" - "+one[0].split('/')[-2]]
     rfTrain=train[indx]
     # params = None
@@ -79,7 +79,7 @@ def parCross(indx):
     # print("Tuning time: %0.2f"%(time()-t))
     t=time()
     for _ in xrange(10):
-      _, new = planners(two, one, rftrain = rfTrain
+      _, new = xtree(two, one, rftrain = rfTrain
                         , tunings = params, justDeltas=False)
       aft.append(new)
     # print("Average Planning time: %0.2f"%((time()-t)/1))
