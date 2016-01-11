@@ -289,8 +289,8 @@ def parallel():
   n_proc = len(train)
   p=Pool(processes=n_proc)
   planner = cross().improve1
-  set_trace()
-  collect.append(p.map(RF, range(n_proc)))
+  # set_trace()
+  collect.append(p.map(planner, range(n_proc)))
   for cc in collect: print(cc)
   set_trace()
 
