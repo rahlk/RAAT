@@ -59,6 +59,34 @@ class temporal:
         e.append(aft)
       rdivDemo(e, isLatex=True, globalMinMax=True, high=100, low=0)
 
+
+def parCross(indx):
+  """
+  Learn from all other projects. Compare the results.
+  :return:
+  """
+  # names=['ant', 'ivy', 'jedit', 'lucene', 'poi']
+  train,test = explore(dir='Data/Jureczko/')
+  one = test[indx]
+  e=[]
+  for two in train:
+    print("##", "Train: ", two[0].split('/')[-2],"Test: ", one[0].split('/')[-2])
+    aft = [two[0].split('/')[-2]]
+    rfTrain=train[indx]
+    set_trace()
+    t=time()
+    # params = None
+    params = tuner(rfTrain)
+    # print("Tuning time: %0.2f"%(time()-t))
+    t=time()
+    for _ in xrange(1):
+      _, new = planners(two, one, rftrain = rfTrain
+                        , tunings = params, justDeltas=False)
+      aft.append(new)
+    # print("Average Planning time: %0.2f"%((time()-t)/1))
+    e.append(aft)
+  rdivDemo(e)
+
 class cross:
   def __init__(self):
     pass
@@ -288,9 +316,9 @@ def parallel():
   train,test = explore(dir='/share/rkrish11/Datasets/Jureczko/')
   n_proc = len(train)
   p=Pool(processes=n_proc)
-  planner = cross().improve1
+  # planner = cross().improve1
   # set_trace()
-  collect.append(p.map(planner, range(n_proc)))
+  collect.append(p.map(parCross, range(n_proc)))
   for cc in collect: print(cc)
   set_trace()
 
