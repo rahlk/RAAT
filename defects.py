@@ -287,12 +287,18 @@ def parallel():
   collect=[]
   train,test = explore(dir='/share/rkrish11/Datasets/Jureczko/')
   n_proc = len(train)
-
+  p=Pool(processes=n_proc)
+  planner = cross().improve1
+  set_trace()
+  collect.append(p.map(RF, range(n_proc)))
+  for cc in collect: print(cc)
+  set_trace()
 
 if __name__=='__main__':
   # accuracy().SVM()
   # accuracy().RF()
-  cross().improve1()
+  parallel()
+  # cross().improve1()
   # mccabe().improve()
   # mccabe().acc()
   # temporal().improve()
