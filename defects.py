@@ -10,6 +10,11 @@ from tools.oracle import *
 # Timing
 from time import time
 from logo import logo
+
+# Parallelism
+from functools import partial
+from multiprocessing import Pool
+
 class temporal:
   def __init__(self):
     pass
@@ -57,33 +62,32 @@ class temporal:
 class cross:
   def __init__(self):
     pass
-  def improve1(self):
+  def improve1(self, indx):
     """
     Learn from all other projects. Compare the results.
     :return:
     """
     # names=['ant', 'ivy', 'jedit', 'lucene', 'poi']
     train,test = explore(dir='Data/Jureczko/')
-    for planners in [xtree]:#, method1, method2, method3]:
-      for i, one in enumerate(test):
-        e=[]
-        for two in train:
-          print("##", "Train: ", two[0].split('/')[-2],"Test: ", one[0].split('/')[-2])
-          aft = [two[0].split('/')[-2]]
-          rfTrain=train[i]
-          set_trace()
-          t=time()
-          # params = None
-          params = tuner(rfTrain)
-          # print("Tuning time: %0.2f"%(time()-t))
-          t=time()
-          for _ in xrange(1):
-            _, new = planners(two, one, rftrain = rfTrain
-                              , tunings = params, justDeltas=False)
-            aft.append(new)
-          # print("Average Planning time: %0.2f"%((time()-t)/1))
-          e.append(aft)
-        rdivDemo(e)
+    one = test[indx]
+    e=[]
+    for two in train:
+      print("##", "Train: ", two[0].split('/')[-2],"Test: ", one[0].split('/')[-2])
+      aft = [two[0].split('/')[-2]]
+      rfTrain=train[indx]
+      set_trace()
+      t=time()
+      # params = None
+      params = tuner(rfTrain)
+      # print("Tuning time: %0.2f"%(time()-t))
+      t=time()
+      for _ in xrange(1):
+        _, new = planners(two, one, rftrain = rfTrain
+                          , tunings = params, justDeltas=False)
+        aft.append(new)
+      # print("Average Planning time: %0.2f"%((time()-t)/1))
+      e.append(aft)
+    rdivDemo(e)
 
   def deltas(self):
     from collections import Counter
@@ -278,6 +282,12 @@ class mccabe:
           G.append(F[0])
         E0.append(G)
       rdivDemo(E0)
+
+def parallel():
+  collect=[]
+  train,test = explore(dir='/share/rkrish11/Datasets/Jureczko/')
+  n_proc = len(train)
+
 
 if __name__=='__main__':
   # accuracy().SVM()
