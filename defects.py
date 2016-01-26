@@ -46,6 +46,37 @@ class temporal:
       header = ['Features']+counts.keys()
       save2plot(header, counts, everything, N=len(changes))
 
+  def deltas0(self):
+    from collections import Counter
+    counts = {}
+
+    def save2plot(header, counts, labels, N):
+      for h in header: say(h+' ')
+      print('')
+      for l in labels:
+        say(l[1:]+' ')
+        for k in counts.keys():
+          say("%0.2f "%(counts[k][l]*100/N))
+        print('')
+
+
+    for name in ['ant', 'ivy', 'jedit', 'lucene', 'poi']:
+      print("##", name)
+      e=[]
+      train, test = explore(dir='Data/Jureczko/', name=name)
+      for planners in [xtree]:
+        for _ in xrange(1):
+          keys=[]
+          everything, changes = planners(train, test, justDeltas=True)
+          # set_trace()
+          for ch in changes:
+            for c in ch:
+              counts.update({keys: (c[key][0]-c[key][1])/c[key][0] for key in c.keys())
+              set_trace()
+      header = ['Features']+counts.keys()
+      save2plot(header, counts, everything, N=len(changes))
+
+
   def improve(self):
     for name in ['lucene', 'poi', 'ant', 'ivy', 'jedit']:
       print("##", name)
@@ -324,7 +355,8 @@ def parallel():
 if __name__=='__main__':
   # accuracy().SVM()
   # accuracy().RF()
-  parallel()
+  # parallel()
+  temporal().deltas0()
   # cross().improve1()
   # mccabe().improve()
   # mccabe().acc()
