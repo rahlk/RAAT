@@ -1,7 +1,7 @@
 from __future__ import print_function, division
 __author__ = 'rkrsn'
 from Planners.CD import *
-from Planners.xtree import xtree
+from Planners.xtree import xtree, flatten
 from tools.sk import rdivDemo
 from tools.misc import explore, say
 from tools.stats import ABCD
@@ -10,7 +10,7 @@ from tools.oracle import *
 # Timing
 from time import time
 from logo import logo
-
+import numpy as np
 # Parallelism
 from functools import partial
 from multiprocessing import Pool
@@ -51,13 +51,18 @@ class temporal:
     counts = {}
 
     def save2plot(header, counts, labels, N):
-      for h in header: say(h+' ')
+      # say('F')
+      # for h in counts.keys(): say(h+' '+h+'_min '+h+'_max ')
+      # print('')
+      # say(l[1:]+' ')
+
+      for k in counts.keys():
+        # print(counts[k])
+        say(k+" %0.2f %0.2f %0.2f\n"%(np.median(counts[k]), np.percentile(counts[k], 25), np.percentile(counts[k], 75)))
+        # set_trace()
+
       print('')
-      for l in labels:
-        say(l[1:]+' ')
-        for k in counts.keys():
-          say("%0.2f "%(counts[k][l]*100/N))
-        print('')
+      # set_trace()
 
 
     for name in ['ant', 'ivy', 'jedit', 'lucene', 'poi']:
@@ -68,10 +73,14 @@ class temporal:
         for _ in xrange(1):
           keys=[]
           everything, changes = planners(train, test, justDeltas=True)
+          keys=list(set(flatten([c.keys() for c in changes])))
+          for k in keys: counts.update({k:[]})
           # set_trace()
           for c in changes:
-              counts.update({key: (c[key][0]-c[key][1])/c[key][0] for key in c.keys()})
-              set_trace()
+            for key in c.keys():
+              counts[key].append(c[key])
+
+      # set_trace()
       header = ['Features']+counts.keys()
       save2plot(header, counts, everything, N=len(changes))
 
@@ -168,11 +177,13 @@ class cross:
           aft = [two]
           train,_ = explore(dir='Data/Jureczko/', name=two)
           test,_  = explore(dir='Data/Jureczko/', name=one)
-          for _ in xrange(1):
-            keys=[]
-            everything, changes = planners(train, test, justDeltas=True)
-            for ch in changes: keys.extend(ch.keys())
-            counts.update({two:Counter(keys)})
+          # for _ in xrange(1):
+          keys=[]
+          everything, changes = planners(train, test, justDeltas=True)
+          attr = list(set([c.keys() for c in changes]))
+          for ch in changes: counts.update
+          for ch in changes: keys.extend(ch.keys())
+          counts.update({two:Counter(keys)})
           # set_trace()
         header = ['Features']+counts.keys()
         save2plot(header, counts, everything, N=len(changes))
