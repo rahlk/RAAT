@@ -69,8 +69,7 @@ class temporal:
           keys=[]
           everything, changes = planners(train, test, justDeltas=True)
           # set_trace()
-          for ch in changes:
-            for c in ch:
+          for c in changes:
               counts.update({keys: (c[key][0]-c[key][1])/c[key][0] for key in c.keys()})
               set_trace()
       header = ['Features']+counts.keys()
