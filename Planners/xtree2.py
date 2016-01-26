@@ -161,7 +161,11 @@ def xtree(train, test, rftrain=None, config=False,tunings=None, justDeltas=False
     if not rftrain: rftrain=train
     test_DF = csv2DF(test)
     tree = pyC45.dtree(train_DF)
-    # set_trace()
+
+    ## ----- debug -----
+    pyC45.show(tree)
+    set_trace()
+
     patch = patches(train=train, test=test, trainDF=train_DF, testDF=test_DF, rfTrain=rftrain, tunings=tunings, tree=tree)
     return patch.main(justDeltas=justDeltas)
 
