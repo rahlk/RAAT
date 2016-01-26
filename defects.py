@@ -71,7 +71,7 @@ class temporal:
           # set_trace()
           for ch in changes:
             for c in ch:
-              counts.update({keys: (c[key][0]-c[key][1])/c[key][0] for key in c.keys())
+              counts.update({keys: (c[key][0]-c[key][1])/c[key][0] for key in c.keys()})
               set_trace()
       header = ['Features']+counts.keys()
       save2plot(header, counts, everything, N=len(changes))
