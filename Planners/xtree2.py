@@ -89,8 +89,10 @@ class patches:
 
   @staticmethod
   def howfar(me, other):
+    set_trace()
     common = [a for a in me.branch if a not in other.branch]
     return len(me.branch)-len(common)
+
 
   def patchIt(i,testInst, config=False):
     # 1. Find where t falls
@@ -98,24 +100,42 @@ class patches:
     testInst = pd.DataFrame(testInst).transpose()
     current = i.find(testInst, i.tree)
     node = current
+
+    def howfar1(me, other):
+      # ch = []
+      # for oth in other:
+        dist=0
+        for aa, bb in zip(me.branch, other.branch):
+          dist+= 1 if aa[0]==bb[0] else 0
+        # ch.append(dist)
+        return dist
+      #
+      # set_trace()
+
+
+      # common = [a for a in me.branch if a not in other.branch]
+      # return len(me.branch)-len(common)
+
     while node.lvl > -1:
       node = node.up  # Move to tree root
 
     leaves = flatten([i.leaves(_k) for _k in node.kids])
-    try:
-      if i.config:
-        best = sorted([l for l in leaves if l.score<current.score], key=lambda F: i.howfar(current,F))[0]
-      else:
-        best = sorted([l for l in leaves if l.score<=0.01*current.score], key=lambda F: i.howfar(current,F))[0]
-    except:
-      return testInst.values.tolist()[0]
-
+    # try:
+    if i.config:
+      best = sorted([l for l in leaves if l.score<current.score], key=lambda F: i.howfar(current,F))[0]
+    else:
+      betters = [l for l in leaves if l.score==0]
+      best = sorted(betters, key=lambda F: howfar1(current,F))[-1]
+    # except:
+    #   return testInst.values.tolist()[0]
+    # set_trace()
     def new(old, range):
       rad = abs(min(range[1]-old, old-range[1]))
       # return randn(old, rad) if rad else old
       # return uniform(old-rad,rad+old)
       return uniform(range[0],range[1])
 
+    # set_trace()
     for ii in best.branch:
       before = testInst[ii[0]]
       if not ii in current.branch:
@@ -162,9 +182,9 @@ def xtree(train, test, rftrain=None, config=False,tunings=None, justDeltas=False
     test_DF = csv2DF(test)
     tree = pyC45.dtree(train_DF)
 
-    ## ----- debug -----
-    pyC45.show(tree)
-    set_trace()
+    # ## ----- debug -----
+    # pyC45.show(tree)
+    # set_trace()
 
     patch = patches(train=train, test=test, trainDF=train_DF, testDF=test_DF, rfTrain=rftrain, tunings=tunings, tree=tree)
     return patch.main(justDeltas=justDeltas)

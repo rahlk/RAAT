@@ -86,7 +86,7 @@ class temporal:
 
 
   def improve(self):
-    for name in ['lucene', 'poi', 'ant', 'ivy', 'jedit']:
+    for name in ['ant', 'lucene', 'poi', 'ivy', 'jedit']:
       print("##", name)
       e=[]
       train, test = explore(dir='Data/Jureczko/', name=name)
