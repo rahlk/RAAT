@@ -96,7 +96,10 @@ class temporal:
           aft.append(planners(train, test, justDeltas=False))
           # set_trace()
         e.append(aft)
-      rdivDemo(e, isLatex=True, globalMinMax=True, high=100, low=0)
+      try:
+        rdivDemo(e, isLatex=True, globalMinMax=True, high=100, low=0)
+      except:
+        set_trace()
 
 
 def parCross(indx):

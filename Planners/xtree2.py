@@ -146,8 +146,8 @@ class patches:
         C.save(name=ii[0], old=then, new=now)
 
     testInst[testInst.columns[-1]] = None
-    i.change.append(C.log
-    set_trace()
+    i.change.append(C.log)
+    # set_trace()
     return testInst.values.tolist()[0]
 
 
