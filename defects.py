@@ -92,7 +92,7 @@ class temporal:
       train, test = explore(dir='Data/Jureczko/', name=name)
       for planners in [xtree]:#, method1, method2, method3]:
         aft = [planners.__doc__]
-        for _ in xrange(1):
+        for _ in xrange(10):
           aft.append(planners(train, test, justDeltas=False))
           # set_trace()
         e.append(aft)
