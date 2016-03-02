@@ -38,7 +38,7 @@ class temporal:
       train, test = explore(dir='Data/Jureczko/', name=name)
       for planners in [xtree]:#, method1, method2, method3]:
         # aft = [planners.__doc__]
-        for _ in xrange(1):
+        for _ in xrange(10):
           keys=[]
           everything, changes = planners(train, test, justDeltas=True)
           for ch in changes: keys.extend(ch.keys())
@@ -50,19 +50,26 @@ class temporal:
     from collections import Counter
     counts = {}
 
-    def save2plot(header, counts, labels, N):
-      # say('F')
-      # for h in counts.keys(): say(h+' '+h+'_min '+h+'_max ')
-      # print('')
-      # say(l[1:]+' ')
-
-      for k in counts.keys():
-        # print(counts[k])
-        say(k+" %0.2f %0.2f %0.2f\n"%(np.median(counts[k]), np.percentile(counts[k], 25), np.percentile(counts[k], 75)))
-        # set_trace()
-
+    def save2plot(header, counts, labels, numCh, N):
+    #   for h in header: say(h+' ')
       print('')
-      # set_trace()
+      for id, l in enumerate(labels):
+        # say(l[1:]+' ')
+        #   for k in counts.keys():
+            # print(counts[k])
+        try:
+            if numCh[l]/N>0.2:
+                # print(numCh[l]/N)
+                say(l[1: ]+" %d %0.2f %0.2f %0.2f"%(id+1,np.median(counts[l]), np.percentile(counts[l], 25), np.percentile(counts[l], 75)))
+            else:
+                say(l[1: ]+" %d 0 0 0"%(id+1))
+
+        except:
+          # set_trace()
+          say(l[1: ]+" %d 0 0 0"%(id+1))
+        # set_trace()
+        print('')
+          # set_trace()
 
 
     for name in ['ant', 'ivy', 'jedit', 'lucene', 'poi']:
@@ -70,19 +77,22 @@ class temporal:
       e=[]
       train, test = explore(dir='Data/Jureczko/', name=name)
       for planners in [xtree]:
-        for _ in xrange(1):
-          keys=[]
+        # keys=[]
+        everything, changes = planners(train, test, justDeltas=True)
+        keys = everything.values.tolist()
+        # set_trace()
+        for k in keys: counts.update({k:[]})
+        f_chCount=[]
+        for _ in xrange(5):
           everything, changes = planners(train, test, justDeltas=True)
-          keys=list(set(flatten([c.keys() for c in changes])))
-          for k in keys: counts.update({k:[]})
-          # set_trace()
           for c in changes:
             for key in c.keys():
+              f_chCount.append(key)
               counts[key].append(c[key])
 
       # set_trace()
       header = ['Features']+counts.keys()
-      save2plot(header, counts, everything, N=len(changes))
+      save2plot(header, counts, everything, numCh=Counter(f_chCount), N=len(changes)*5)
 
 
   def improve(self):
@@ -97,7 +107,7 @@ class temporal:
           # set_trace()
         e.append(aft)
       try:
-        rdivDemo(e, isLatex=True, globalMinMax=True, high=100, low=0)
+        rdivDemo(e, isLatex=False, globalMinMax=True, high=100, low=0)
       except:
         set_trace()
 
@@ -211,9 +221,11 @@ class accuracy:
       Pd=[tr[0].split('/')[-2]]
       Pf=[tr[0].split('/')[-2]]
       G =[tr[0].split('/')[-2]]
-      tunings = tuner(tr)
+      tunings = tuner(tr, smoteTune=True)
       for _ in xrange(1):
-        actual, preds = rforest(tr, te, tunings=None, smoteit=False)
+        # TUNE RF + Naive SMOTE
+
+        actual, preds = rforest(tr, te, tunings=tunings, smoteit=True, smoteTune=False)
         abcd = ABCD(before=actual, after=preds)
         F = np.array([k.stats()[-2] for k in abcd()])
         Pd0 = np.array([k.stats()[0] for k in abcd()])
@@ -369,9 +381,10 @@ if __name__=='__main__':
   # accuracy().SVM()
   # accuracy().RF()
   # parallel()
-  # temporal().deltas0()
+  temporal().deltas0()
+  # temporal().deltas()
   # cross().improve1()
   # mccabe().improve()
   # mccabe().acc()
-  temporal().improve()
+  # temporal().improve()
   # cross().deltas()

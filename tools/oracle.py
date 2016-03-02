@@ -14,9 +14,9 @@ import warnings
 from time import time
 warnings.filterwarnings('ignore')
 
-def SMOTE(data=None, atleast=50, atmost=100, a=2,b=1, k=5, resample=False):
+def SMOTE(data=None, atleast=50, atmost=100, a=None,b=None, k=5, resample=False):
   "Synthetic Minority Oversampling Technique"
-
+  # set_trace()
   def knn(a,b):
     "k nearest neighbors"
     b=np.array([bb[:-1] for bb in b])
@@ -44,7 +44,10 @@ def SMOTE(data=None, atleast=50, atmost=100, a=2,b=1, k=5, resample=False):
     t=time()
     newData = [dd.tolist() for dd in data]
     if atleast-len(newData)<0:
-      return [choice(newData) for _ in xrange(atleast)]
+      try:
+        return [choice(newData) for _ in xrange(atleast)]
+      except:
+        set_trace()
     else:
       for _ in xrange(atleast-len(newData)):
         one = choice(data)
@@ -82,8 +85,9 @@ def SMOTE(data=None, atleast=50, atmost=100, a=2,b=1, k=5, resample=False):
   # rseed(1)
   klass = lambda df: df[df.columns[-1]]
   count = Counter(klass(data))
-  atleast=int(a*max([count[k] for k in count.keys()]))
-  atmost=int(b*max([count[k] for k in count.keys()]))
+  # set_trace()
+  atleast=50 if a==None else int(a*max([count[k] for k in count.keys()]))
+  atmost=100 if b==None else int(b*max([count[k] for k in count.keys()]))
   major, minor = count.keys()
   # set_trace()
   for u in count.keys():
@@ -106,8 +110,14 @@ def _smote():
   # ---- ::DEBUG:: -----
   set_trace()
 
-def rforest(train, test, tunings=None, smoteit=True, bin=True, regress=False):
+def rforest(train, test, tunings=None, smoteit=True, bin=True, smoteTune=True,regress=False):
   "RF "
+  if tunings and smoteTune==False:
+      a=b=None
+  elif tunings and smoteTune==True:
+    a=tunings[-2]
+    b=tunings[-1]
+
   if not isinstance(train, pd.core.frame.DataFrame):
     train = csv2DF(train, as_mtx=False, toBin=bin)
 
@@ -118,7 +128,7 @@ def rforest(train, test, tunings=None, smoteit=True, bin=True, regress=False):
     if not tunings:
       train = SMOTE(train, resample=True)
     else:
-      train = SMOTE(train, a=tunings[-2], b=tunings[-1], resample=True)
+      train = SMOTE(train, a, b, resample=True)
     # except: set_trace()
 
   if not tunings:

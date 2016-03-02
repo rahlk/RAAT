@@ -42,7 +42,9 @@ class changes():
 
   def save(self, name=None, old=None, new=None):
     if not old == new:
-      self.log.update({name: (old-new)/old*100})
+      d = new/old if new>old else -new/old #*100
+      d = d if np.isfinite(d) else 0# (new-old)/new*100
+      self.log.update({name: d})
 
 class patches:
 

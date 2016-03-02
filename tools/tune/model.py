@@ -19,7 +19,7 @@ class rf:
   """
   Random Forest
   """
-  def __init__(i, data, obj=2,n_dec=7):
+  def __init__(i, data, obj=2,n_dec=7,smoteTune=True):
     i.n_dec = n_dec
     i.train = csv2DF(data[:-1], toBin=True)
     i.test = csv2DF([data[-1]], toBin=True)
@@ -31,6 +31,7 @@ class rf:
                 , (2, 50)   # max_leaf_nodes
                 , (1,  8)   # Minority sampling factor
                 , (0,  4)]  # Majority sampling factor
+    i.smoteTune=smoteTune
 
   def generate(i,n):
     return [[uniform(i.dec_lim[indx][0]
@@ -39,7 +40,9 @@ class rf:
 
   def solve(i,dec):
     # t=time()
-    actual, predicted = rforest(i.train, i.test, tunings=dec, smoteit=True)
+    actual, predicted = rforest(i.train, i.test, tunings=dec, smoteit=True
+    ,smoteTune=i.smoteTune)
+    # except: set_trace()
     # print(time()-t)
     abcd = ABCD(before=actual, after=predicted)
     qual = np.array([k.stats() for k in abcd()])
@@ -55,7 +58,7 @@ class rf:
     out=1-pf if pf>0.7 else 0
     out1=1-pd if pd>0.6 else 0
     # set_trace()
-    return [prec, prec]
+    return [out, prec]
     # return [out,out1]
     # return [pf if pf>0.6 else 0, pd if pd>0.6 else 0]
     # return [qual[0][1], qual[1][1]]
