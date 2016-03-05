@@ -139,7 +139,7 @@ class patches:
     gain = (1-sum(after)/sum(i.testDF[i.testDF.columns[-1]]))*100 if i.config else (1-sum(after)/len(after))*100
 
     if not justDeltas:
-      return newRows, gain
+      return gain
     else:
       return i.testDF.columns[:-1], i.change
 
