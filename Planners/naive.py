@@ -48,7 +48,7 @@ def apply(changes, row):
 
   return all
 
-def planner(train, test, rftrain=None, tunings=None, verbose=False):
+def shatnawi10(train, test, rftrain=None, tunings=None, verbose=False):
 
   "Threshold based planning"
 
@@ -94,7 +94,7 @@ def planner(train, test, rftrain=None, tunings=None, verbose=False):
   new =[]
   for n in xrange(nChange):
     new.append(["Reduce "+table_rows[n+1][0]])
-    for _ in xrange(5):
+    for _ in xrange(30):
       modified=[]
       for attr in buggy:
         modified.append(apply(changes, attr)[n])
@@ -106,22 +106,104 @@ def planner(train, test, rftrain=None, tunings=None, verbose=False):
 
   return new
 
-def __test():
+def alves10(train, test, rftrain=None, tunings=None, verbose=False):
+  import numpy as np
+  import matplotlib.pyplot as plt
+  data_DF=csv2DF(train, toBin=True)
+  metrics=[str[1:] for str in data_DF[data_DF.columns[:-1]]]
+  X = data_DF[data_DF.columns[:-1]].values # Independent Features (CK-Metrics)
+
+  try: tot_loc = data_DF.sum()["$loc"]
+  except: set_trace()
+
+  def entWeight(X):
+    Y =[]
+    for x in X:
+      loc = x[10] # LOC is the 10th index position.
+      Y.append([xx*loc/tot_loc for xx in x])
+    return Y
+
+  X = entWeight(X)
+  denom = pd.DataFrame(X).sum().values
+  norm_sum= pd.DataFrame(pd.DataFrame(X).values/denom, columns=metrics)
+
+  set_trace()
+
+  y = data_DF[data_DF.columns[-1]].values  # Dependent Feature (Bugs)
+  pVal  = f_classif(X,y)[1]   # P-Values
+
+  if verbose:
+    "Pretty Print Thresholds"
+    table = Texttable()
+    table.set_cols_align(["l","l","l"])
+    table.set_cols_valign(["m","m","m"])
+    table.set_cols_dtype(['t', 't', 't'])
+    table_rows=[["Metric", "Threshold", "P-Value"]]
+
+
+  "Find Thresholds"
+  cutoff=[]
+  for idx in xrange(len(data_DF.columns[:-1])):
+    # Setup Cumulative Dist. Func.
+    bins = int(np.sqrt(len(data_DF)))
+    values, base = np.histogram(X[idx], bins=bins)
+    cumulative = np.cumsum(values)
+    if pVal[idx]<0.05:
+      cutoff.append(base[int(0.9*len(base))])
+      if verbose: table_rows.append([metrics[idx], "%0.2f"%(base[int(0.9*bins)]), "%0.3f"%pVal[idx]])
+    else:
+      cutoff.append(-1)
+
+  if verbose:
+    table.add_rows(table_rows)
+    print(table.draw(), "\n")
+
+
+  """ Apply Plans Sequentially
+  """
+  nChange = len(table_rows)-1
+  testDF = csv2DF(test, toBin=True)
+  buggy = [testDF.iloc[n].values.tolist() for n in xrange(testDF.shape[0]) if testDF.iloc[n][-1]>0]
+  before = len(buggy)
+  new =[]
+  for n in xrange(nChange):
+    new.append(["Reduce "+table_rows[n+1][0]])
+    for _ in xrange(1):
+      modified=[]
+      for attr in buggy:
+        modified.append(apply(cutoff, attr)[n])
+
+      modified=pd.DataFrame(modified, columns = data_DF.columns)
+      before, after = rforest(train, modified, tunings=None, bin = True, regress=False)
+      gain = (1 - sum(after)/sum(before))*100
+      new[n].append(gain)
+
+  return new
+
+
+def _testAlves():
+  for name in ['ant', 'ivy', 'jedit', 'lucene', 'poi']:
+    print("##", name, '\n')
+    train, test = explore(dir='../Data/Jureczko/', name=name)
+    alves10(train, test, verbose=True)
+
+def __testAll():
   for name in ['ant', 'ivy', 'jedit', 'lucene', 'poi']:
     print("##", name)
     train, test = explore(dir='../Data/Jureczko/', name=name)
-    E = planner(train, test, verbose=True)
-
+    # E = shatnawi10(train, test, verbose=True)
+    E = alves10(train, test, verbose=True)
     E.append(['RANK'])
-    E[-1].extend([xtree(train, test, justDeltas=False) for _ in xrange(5)])
+    E[-1].extend([xtree(train, test, justDeltas=False) for _ in xrange(1)])
 
-    rdivDemo(E, isLatex=False, globalMinMax=True, high=100, low=0)
+    rdivDemo(E, isLatex=True, globalMinMax=True, high=100, low=0)
     print("\n")
     # set_trace()
 
 if __name__=="__main__":
   from logo import logo
-  __test()
+  __testAll()
+  # _testAlves()
 
 
 
