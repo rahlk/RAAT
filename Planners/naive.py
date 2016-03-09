@@ -185,7 +185,8 @@ def alves10(train, test, rftrain=None, tunings=None, verbose=False):
     for _ in xrange(1):
       modified=[]
       for attr in buggy:
-        modified.append(apply(cutoff, attr)[n])
+        try: modified.append(apply(cutoff, attr)[n])
+        except: set_trace()
 
       modified=pd.DataFrame(modified, columns = data_DF.columns)
       before, after = rforest(train, modified, tunings=None, bin = True, regress=False)
