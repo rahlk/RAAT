@@ -152,14 +152,19 @@ def alves10(train, test, rftrain=None, tunings=None, verbose=False):
   for idx in xrange(len(data_DF.columns[:-1])):
     # Setup Cumulative Dist. Func.
     name = metrics[idx]
-    loc  = data_DF["$loc"].values[10]
+    loc  = data_DF["$loc"].values[idx]
     vals = norm_sum[name].values
     sorted_ids = np.argsort(vals)
-    cumulative = cumsum(sorted(vals))
+    cumulative = [sum(vals[:i]) for i,__ in enumerate(sorted(vals))]
+    # set_trace()
     if pVal[idx]<0.05:
       cutpoint = point(cumulative)
       cutoff.append(vals[sorted_ids[cutpoint]]*tot_loc/loc*denom[idx])
-      if verbose: table_rows.append([metrics[idx], "%0.2f"%(vals[sorted_ids[cutpoint]]*tot_loc/loc*denom[idx]), "%0.3f"%pVal[idx]])
+      if verbose:
+        try: table_rows.append([metrics[idx]
+                                 , "%0.2f"%(vals[sorted_ids[cutpoint]]*tot_loc/loc*denom[idx])
+                                 , "%0.3f"%pVal[idx]])
+        except: set_trace()
     else:
       cutoff.append(-1)
 
