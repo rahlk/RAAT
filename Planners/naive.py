@@ -127,7 +127,7 @@ def alves10(train, test, rftrain=None, tunings=None, verbose=False):
   denom = pd.DataFrame(X).sum().values
   norm_sum= pd.DataFrame(pd.DataFrame(X).values/denom, columns=metrics)
 
-  set_trace()
+  # set_trace()
 
   y = data_DF[data_DF.columns[-1]].values  # Dependent Feature (Bugs)
   pVal  = f_classif(X,y)[1]   # P-Values
@@ -143,14 +143,23 @@ def alves10(train, test, rftrain=None, tunings=None, verbose=False):
 
   "Find Thresholds"
   cutoff=[]
+  cumsum = lambda vals: [sum(vals[:i]) for i, __ in enumerate(vals)]
+
+  def point(array):
+    for idx, val in enumerate(array):
+      if val>0.8: return idx
+
   for idx in xrange(len(data_DF.columns[:-1])):
     # Setup Cumulative Dist. Func.
-    bins = int(np.sqrt(len(data_DF)))
-    values, base = np.histogram(X[idx], bins=bins)
-    cumulative = np.cumsum(values)
+    name = metrics[idx]
+    loc  = data_DF["$loc"].values[10]
+    vals = norm_sum[name].values
+    sorted_ids = np.argsort(vals)
+    cumulative = cumsum(sorted(vals))
     if pVal[idx]<0.05:
-      cutoff.append(base[int(0.9*len(base))])
-      if verbose: table_rows.append([metrics[idx], "%0.2f"%(base[int(0.9*bins)]), "%0.3f"%pVal[idx]])
+      cutpoint = point(cumulative)
+      cutoff.append(vals[sorted_ids[cutpoint]]*tot_loc/loc*denom[idx])
+      if verbose: table_rows.append([metrics[idx], "%0.2f"%(vals[sorted_ids[cutpoint]]*tot_loc/loc*denom[idx]), "%0.3f"%pVal[idx]])
     else:
       cutoff.append(-1)
 
