@@ -58,7 +58,7 @@ class rf:
     out=1-pf if pf>0.7 else 0
     out1=1-pd if pd>0.6 else 0
     # set_trace()
-    return [out, prec]
+    return [prec, prec]
     # return [out,out1]
     # return [pf if pf>0.6 else 0, pd if pd>0.6 else 0]
     # return [qual[0][1], qual[1][1]]

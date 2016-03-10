@@ -1,7 +1,7 @@
 from __future__ import print_function, division
 __author__ = 'rkrsn'
 from Planners.CD import *
-from Planners.xtree2 import xtree, flatten
+from Planners.xtree import xtree, flatten
 from tools.sk import rdivDemo
 from tools.misc import explore, say
 from tools.stats import ABCD
@@ -379,9 +379,9 @@ def parallel():
 
 if __name__=='__main__':
   # accuracy().SVM()
-  # accuracy().RF()
+  accuracy().RF()
   # parallel()
-  temporal().deltas0()
+  # temporal().deltas0()
   # temporal().deltas()
   # cross().improve1()
   # mccabe().improve()

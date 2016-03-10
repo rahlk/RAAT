@@ -5,6 +5,7 @@ from scipy.spatial.distance import euclidean
 from random import choice, seed as rseed, uniform as rand
 import pandas as pd
 import numpy as np
+from texttable import Texttable
 from stats import ABCD
 from misc import *
 from pdb import set_trace
@@ -86,15 +87,15 @@ def SMOTE(data=None, atleast=50, atmost=100, a=None,b=None, k=5, resample=False)
   klass = lambda df: df[df.columns[-1]]
   count = Counter(klass(data))
   # set_trace()
-  atleast=50 if a==None else int(a*max([count[k] for k in count.keys()]))
-  atmost=100 if b==None else int(b*max([count[k] for k in count.keys()]))
+  atleast=50# if a==None else int(a*max([count[k] for k in count.keys()]))
+  atmost=100# if b==None else int(b*max([count[k] for k in count.keys()]))
   major, minor = count.keys()
   # set_trace()
   for u in count.keys():
     if u==minor:
       newCells.extend(populate([r for r in data.as_matrix() if r[-1] == u], atleast=atleast))
     if u==major:
-      newCells.extend(populate([r for r in data.as_matrix() if r[-1] == u], atleast=atmost))
+      newCells.extend(depopulate([r for r in data.as_matrix() if r[-1] == u]))
     else:
       newCells.extend([r.tolist() for r in data.as_matrix() if r[-1] == u])
   # set_trace()

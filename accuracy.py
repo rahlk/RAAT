@@ -77,8 +77,9 @@ def SVM(indx):
 
 def parallel():
   collect=[]
-  train,test = explore(dir='/share/rkrish11/Datasets/Jureczko/')
+  train,test = explore(dir='Data/Jureczko/')
   n_proc = len(train)
+  set_trace()
   p=Pool(processes=n_proc)
   collect.append(p.map(RF, range(n_proc)))
   for cc in collect: print(cc)
