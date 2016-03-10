@@ -182,7 +182,7 @@ def alves10(train, test, rftrain=None, tunings=None, verbose=False):
   new =[]
   for n in xrange(nChange):
     new.append(["Reduce "+table_rows[n+1][0]])
-    for _ in xrange(30):
+    for _ in xrange(10):
       modified=[]
       for attr in buggy:
         try: modified.append(apply(cutoff, attr)[n])
@@ -209,7 +209,7 @@ def __testAll():
     # E = shatnawi10(train, test, verbose=True)
     E = alves10(train, test, verbose=True)
     E.append(['RANK'])
-    E[-1].extend([xtree(train, test, justDeltas=False) for _ in xrange(30)])
+    E[-1].extend([xtree(train, test, justDeltas=False) for _ in xrange(10)])
 
     rdivDemo(E, isLatex=True, globalMinMax=True, high=100, low=0)
     print("\n")
