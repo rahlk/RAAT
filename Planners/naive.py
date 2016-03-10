@@ -13,7 +13,7 @@ from sklearn.feature_selection import f_classif, f_regression
 from random import uniform
 from xtree import  xtree
 from tools.sk import rdivDemo
-
+from texttable import *
 # from tools.sk import *
 # from tools.misc import *
 # import tools.pyC45 as pyC45
@@ -43,10 +43,18 @@ def apply(changes, row):
     if thres>0:
       if newRow[idx]>thres:
         newRow[idx] = uniform(0, thres)
-
-    all.append(newRow)
+      all.append(newRow)
 
   return all
+
+def apply2(changes, row):
+  newRow = row
+  for idx, thres in enumerate(changes):
+    if thres>0:
+      if newRow[idx]>thres:
+        newRow[idx] = uniform(0, thres)
+
+  return newRow
 
 def shatnawi10(train, test, rftrain=None, tunings=None, verbose=False):
 
@@ -84,25 +92,45 @@ def shatnawi10(train, test, rftrain=None, tunings=None, verbose=False):
   if verbose:
     table.add_rows(table_rows)
     print(table.draw(), "\n")
+  #
+  # """ Apply Plans Sequentially
+  # """
+  # nChange = len(table_rows)-1
+  # testDF = csv2DF(test, toBin=True)
+  # buggy = [testDF.iloc[n].values.tolist() for n in xrange(testDF.shape[0]) if testDF.iloc[n][-1]>0]
+  # before = len(buggy)
+  # new =[]
+  # for n in xrange(nChange):
+  #   new.append(["Reduce "+table_rows[n+1][0]])
+  #   for _ in xrange(30):
+  #     modified=[]
+  #     for attr in buggy:
+  #       modified.append(apply(changes, attr)[n])
+  #
+  #     modified=pd.DataFrame(modified, columns = data_DF.columns)
+  #     before, after = rforest(train, modified, tunings=None, bin = True, regress=False)
+  #     gain = (1 - sum(after)/sum(before))*100
+  #     new[n].append(gain)
+  #
+  # return new
 
   """ Apply Plans Sequentially
   """
-  nChange = len(table_rows)-1
+  nChange = len([c for c in changes if c>0])
   testDF = csv2DF(test, toBin=True)
   buggy = [testDF.iloc[n].values.tolist() for n in xrange(testDF.shape[0]) if testDF.iloc[n][-1]>0]
   before = len(buggy)
-  new =[]
-  for n in xrange(nChange):
-    new.append(["Reduce "+table_rows[n+1][0]])
-    for _ in xrange(30):
-      modified=[]
-      for attr in buggy:
-        modified.append(apply(changes, attr)[n])
+  new =["Shatnawi"]
+  # for n in xrange(nChange):
+  for _ in xrange(10):
+    modified=[]
+    for attr in buggy:
+      modified.append(apply2(changes, attr))
 
-      modified=pd.DataFrame(modified, columns = data_DF.columns)
-      before, after = rforest(train, modified, tunings=None, bin = True, regress=False)
-      gain = (1 - sum(after)/sum(before))*100
-      new[n].append(gain)
+    modified=pd.DataFrame(modified, columns = data_DF.columns)
+    before, after = rforest(train, modified, tunings=None, bin = True, regress=False)
+    gain = (1 - sum(after)/sum(before))*100
+    new.append(gain)
 
   return new
 
@@ -173,25 +201,47 @@ def alves10(train, test, rftrain=None, tunings=None, verbose=False):
     print(table.draw(), "\n")
 
 
+  # """ Apply Plans Sequentially
+  # """
+  # nChange = len([c for c in cutoff if c>0])
+  # testDF = csv2DF(test, toBin=True)
+  # buggy = [testDF.iloc[n].values.tolist() for n in xrange(testDF.shape[0]) if testDF.iloc[n][-1]>0]
+  # before = len(buggy)
+  # new =[]
+  # for n in xrange(nChange):
+  #   new.append(["Reduce "+table_rows[n+1][0]])
+  #   for _ in xrange(10):
+  #     modified=[]
+  #     for attr in buggy:
+  #       try: modified.append(apply(cutoff, attr)[n])
+  #       except: set_trace()
+  #
+  #     modified=pd.DataFrame(modified, columns = data_DF.columns)
+  #     before, after = rforest(train, modified, tunings=None, bin = True, regress=False)
+  #     gain = (1 - sum(after)/sum(before))*100
+  #     new[n].append(gain)
+  #
+  # return new
+
+
   """ Apply Plans Sequentially
   """
   nChange = len([c for c in cutoff if c>0])
   testDF = csv2DF(test, toBin=True)
   buggy = [testDF.iloc[n].values.tolist() for n in xrange(testDF.shape[0]) if testDF.iloc[n][-1]>0]
   before = len(buggy)
-  new =[]
+  new =['Alves']
   for n in xrange(nChange):
-    new.append(["Reduce "+table_rows[n+1][0]])
-    for _ in xrange(30):
+    for _ in xrange(10):
       modified=[]
       for attr in buggy:
-        try: modified.append(apply(cutoff, attr)[n])
+        try: modified.append(apply2(cutoff, attr))
         except: set_trace()
 
       modified=pd.DataFrame(modified, columns = data_DF.columns)
       before, after = rforest(train, modified, tunings=None, bin = True, regress=False)
       gain = (1 - sum(after)/sum(before))*100
-      new[n].append(gain)
+      new.append(gain)
 
   return new
 
@@ -203,17 +253,17 @@ def _testAlves():
     alves10(train, test, verbose=True)
 
 def __testAll():
+  E = []
   for name in ['ant', 'ivy', 'jedit', 'lucene', 'poi']:
     print("##", name)
     train, test = explore(dir='../Data/Jureczko/', name=name)
-    # E = shatnawi10(train, test, verbose=True)
-    E = alves10(train, test, verbose=True)
+    E.append(shatnawi10(train, test, verbose=False))
+    E.append(alves10(train, test, verbose=False))
     E.append(['RANK'])
-    E[-1].extend([xtree(train, test, justDeltas=False) for _ in xrange(30)])
-
+    E[-1].extend([xtree(train, test, justDeltas=False) for _ in xrange(10)])
+    # set_trace()
     rdivDemo(E, isLatex=True, globalMinMax=True, high=100, low=0)
     print("\n")
-    # set_trace()
 
 if __name__=="__main__":
   from logo import logo
