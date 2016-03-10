@@ -44,7 +44,7 @@ def apply(changes, row):
       if newRow[idx]>thres:
         newRow[idx] = uniform(0, thres)
 
-      all.append(newRow)
+    all.append(newRow)
 
   return all
 
@@ -147,7 +147,7 @@ def alves10(train, test, rftrain=None, tunings=None, verbose=False):
 
   def point(array):
     for idx, val in enumerate(array):
-      if val>0.8: return idx
+      if val>0.7: return idx
 
   for idx in xrange(len(data_DF.columns[:-1])):
     # Setup Cumulative Dist. Func.
@@ -175,14 +175,14 @@ def alves10(train, test, rftrain=None, tunings=None, verbose=False):
 
   """ Apply Plans Sequentially
   """
-  nChange = len(table_rows)-1
+  nChange = len([c for c in cutoff if c>0])
   testDF = csv2DF(test, toBin=True)
   buggy = [testDF.iloc[n].values.tolist() for n in xrange(testDF.shape[0]) if testDF.iloc[n][-1]>0]
   before = len(buggy)
   new =[]
   for n in xrange(nChange):
     new.append(["Reduce "+table_rows[n+1][0]])
-    for _ in xrange(1):
+    for _ in xrange(30):
       modified=[]
       for attr in buggy:
         try: modified.append(apply(cutoff, attr)[n])
@@ -209,7 +209,7 @@ def __testAll():
     # E = shatnawi10(train, test, verbose=True)
     E = alves10(train, test, verbose=True)
     E.append(['RANK'])
-    E[-1].extend([xtree(train, test, justDeltas=False) for _ in xrange(1)])
+    E[-1].extend([xtree(train, test, justDeltas=False) for _ in xrange(30)])
 
     rdivDemo(E, isLatex=True, globalMinMax=True, high=100, low=0)
     print("\n")
