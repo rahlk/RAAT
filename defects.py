@@ -28,7 +28,7 @@ class temporal:
       for l in labels:
         say(l[1:]+' ')
         for k in counts.keys():
-          say("%0.2f "%(counts[k][l]*100/N))
+          say("%0.2f,"%(counts[k][l]*100/N))
         print('')
 
 
@@ -36,7 +36,7 @@ class temporal:
       print("##", name)
       e=[]
       train, test = explore(dir='Data/Jureczko/', name=name)
-      for planners in [xtree]:#, method1, method2, method3]:
+      for planners in [xtree, method1]: #, method2, method3]:
         # aft = [planners.__doc__]
         for _ in xrange(10):
           keys=[]
@@ -379,10 +379,10 @@ def parallel():
 
 if __name__=='__main__':
   # accuracy().SVM()
-  accuracy().RF()
+  # accuracy().RF()
   # parallel()
   # temporal().deltas0()
-  # temporal().deltas()
+  temporal().deltas()
   # cross().improve1()
   # mccabe().improve()
   # mccabe().acc()
