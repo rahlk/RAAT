@@ -111,33 +111,6 @@ class temporal:
       except:
         set_trace()
 
-
-def parCross(indx):
-  """
-  Learn from all other projects. Compare the results.
-  :return:
-  """
-  # names=['ant', 'ivy', 'jedit', 'lucene', 'poi']
-  train,test = explore(dir='Data/Jureczko/')
-  one = test[indx]
-  e=[]
-  for two in train:
-    # say(two[0].split('/')[-2]+" - "+one[0].split('/')[-2])
-    # print("##", "Train: ", two[0].split('/')[-2],"Test: ", one[0].split('/')[-2])
-    aft = [two[0].split('/')[-2]+" - "+one[0].split('/')[-2]]
-    rfTrain=train[indx]
-    # params = None
-    params = tuner(rfTrain)
-    # print("Tuning time: %0.2f"%(time()-t))
-    t=time()
-    for _ in xrange(10):
-      _, new = xtree(two, one, rftrain = rfTrain
-                        , tunings = params, justDeltas=False)
-      aft.append(new)
-    # print("Average Planning time: %0.2f"%((time()-t)/1))
-    e.append(aft)
-  rdivDemo(e)
-
 class cross:
   def __init__(self):
     pass
@@ -366,6 +339,34 @@ class mccabe:
         E0.append(G)
       rdivDemo(E0)
 
+
+def parCross(indx):
+  """
+  Learn from all other projects. Compare the results.
+  :return:
+  """
+  # names=['ant', 'ivy', 'jedit', 'lucene', 'poi']
+  train,test = explore(dir='Data/Jureczko/')
+  one = test[indx]
+  e=[]
+  for two in train:
+    # say(two[0].split('/')[-2]+" - "+one[0].split('/')[-2])
+    # print("##", "Train: ", two[0].split('/')[-2],"Test: ", one[0].split('/')[-2])
+    aft = [two[0].split('/')[-2]+" - "+one[0].split('/')[-2]]
+    rfTrain=train[indx]
+    # params = None
+    params = tuner(rfTrain)
+    # print("Tuning time: %0.2f"%(time()-t))
+    t=time()
+    for _ in xrange(10):
+      _, new = xtree(two, one, rftrain = rfTrain
+                        , tunings = params, justDeltas=False)
+      aft.append(new)
+    # print("Average Planning time: %0.2f"%((time()-t)/1))
+    e.append(aft)
+  rdivDemo(e)
+
+
 def parallel():
   collect=[]
   train,test = explore(dir='Data/Jureczko/')
@@ -380,7 +381,7 @@ def parallel():
 if __name__=='__main__':
   # accuracy().SVM()
   # accuracy().RF()
-  parallel()
+  # parallel()
   # temporal().deltas0()
   # temporal().deltas()
   # cross().improve1()
@@ -388,3 +389,4 @@ if __name__=='__main__':
   # mccabe().acc()
   # temporal().improve()
   # cross().deltas()
+  parCross(1)
