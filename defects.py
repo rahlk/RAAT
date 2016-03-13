@@ -368,7 +368,7 @@ class mccabe:
 
 def parallel():
   collect=[]
-  train,test = explore(dir='/share/rkrish11/Datasets/Jureczko/')
+  train,test = explore(dir='Data/Jureczko/')
   n_proc = len(train)
   p=Pool(processes=n_proc)
   # planner = cross().improve1
@@ -379,8 +379,8 @@ def parallel():
 
 if __name__=='__main__':
   # accuracy().SVM()
-  accuracy().RF()
-  # parallel()
+  # accuracy().RF()
+  parallel()
   # temporal().deltas0()
   # temporal().deltas()
   # cross().improve1()

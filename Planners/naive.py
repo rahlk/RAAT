@@ -14,6 +14,7 @@ from random import uniform
 from xtree import  xtree
 from tools.sk import rdivDemo
 from texttable import *
+from CD import method1
 # from tools.sk import *
 # from tools.misc import *
 # import tools.pyC45 as pyC45
@@ -122,7 +123,7 @@ def shatnawi10(train, test, rftrain=None, tunings=None, verbose=False):
   before = len(buggy)
   new =["Shatnawi"]
   # for n in xrange(nChange):
-  for _ in xrange(10):
+  for _ in xrange(50):
     modified=[]
     for attr in buggy:
       modified.append(apply2(changes, attr))
@@ -180,14 +181,14 @@ def alves10(train, test, rftrain=None, tunings=None, verbose=False):
   for idx in xrange(len(data_DF.columns[:-1])):
     # Setup Cumulative Dist. Func.
     name = metrics[idx]
-    loc  = data_DF["$loc"].values[idx]
+    loc  = data_DF["$loc"].values
     vals = norm_sum[name].values
     sorted_ids = np.argsort(vals)
     cumulative = [sum(vals[:i]) for i,__ in enumerate(sorted(vals))]
     # set_trace()
     if pVal[idx]<0.05:
       cutpoint = point(cumulative)
-      cutoff.append(vals[sorted_ids[cutpoint]]*tot_loc/loc*denom[idx])
+      cutoff.append(vals[sorted_ids[cutpoint]]*tot_loc/loc[sorted_ids[cutpoint]]*denom[idx])
       if verbose:
         try: table_rows.append([metrics[idx]
                                  , "%0.2f"%(vals[sorted_ids[cutpoint]]*tot_loc/loc*denom[idx])
@@ -232,7 +233,7 @@ def alves10(train, test, rftrain=None, tunings=None, verbose=False):
   before = len(buggy)
   new =['Alves']
   for n in xrange(nChange):
-    for _ in xrange(10):
+    for _ in xrange(50):
       modified=[]
       for attr in buggy:
         try: modified.append(apply2(cutoff, attr))
@@ -253,14 +254,14 @@ def _testAlves():
     alves10(train, test, verbose=True)
 
 def __testAll():
-  E = []
   for name in ['ant', 'ivy', 'jedit', 'lucene', 'poi']:
+    E = []
     print("##", name)
     train, test = explore(dir='../Data/Jureczko/', name=name)
-    E.append(shatnawi10(train, test, verbose=False))
-    E.append(alves10(train, test, verbose=False))
-    E.append(['RANK'])
-    E[-1].extend([xtree(train, test, justDeltas=False) for _ in xrange(10)])
+    # E.append(shatnawi10(train, test, verbose=False))
+    # E.append(alves10(train, test, verbose=False))
+    E.append(['CD'])
+    E[-1].extend([method1(train, test, justDeltas=False) for _ in xrange(10)])
     # set_trace()
     rdivDemo(E, isLatex=True, globalMinMax=True, high=100, low=0)
     print("\n")
