@@ -358,9 +358,13 @@ def parCross(indx):
     params = tuner(rfTrain)
     # print("Tuning time: %0.2f"%(time()-t))
     t=time()
-    for _ in xrange(10):
-      _, new = xtree(two, one, rftrain = rfTrain
-                        , tunings = params, justDeltas=False)
+    for _ in xrange(1):
+      try:
+        _, new = xtree(two, one, rftrain = rfTrain, tunings = params, justDeltas=False)
+      except:
+        set_trace()
+
+
       aft.append(new)
     # print("Average Planning time: %0.2f"%((time()-t)/1))
     e.append(aft)
