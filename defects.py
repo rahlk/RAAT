@@ -360,7 +360,7 @@ def parCross(indx):
     t=time()
     for _ in xrange(1):
       try:
-        _, new = xtree(two, one, rftrain = rfTrain, tunings = params, justDeltas=False)
+        new = xtree(two, one, rftrain = rfTrain, tunings = params, justDeltas=False)
       except:
         set_trace()
 
