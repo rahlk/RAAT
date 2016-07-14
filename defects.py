@@ -2,6 +2,7 @@ from __future__ import print_function, division
 __author__ = 'rkrsn'
 from Planners.CD import *
 from Planners.xtree import xtree, flatten
+from Planners.xtree2 import xtree as xtree2
 from tools.sk import rdivDemo
 from tools.misc import explore, say
 from tools.stats import ABCD
@@ -238,35 +239,13 @@ class accuracy:
       # for _ in xrange(1):
       tunings = None #tuner(tr)
       smote= True
-      # tunings = tuner(tr)
-      # set_trace()
       actual, preds = rforest(tr, te, tunings=tunings, smoteit=smote)
       abcd = ABCD(before=actual, after=preds)
       F = np.array([k.stats()[-2] for k in abcd()])
       Pd0 = np.array([k.stats()[0] for k in abcd()])
       Pf0 = np.array([k.stats()[1] for k in abcd()])
-      # set_trace()
       G.append(F[0])
       say(tr[0].split('/')[-2]+', %0.2f, %0.2f\n'%(Pd0[1], 1-Pf0[1]))
-      #
-      # # Tune+SMOTE
-      # tunings = None#tuner(tr)
-      # smote= True
-      # actual, preds = rforest(tr, te, tunings=tunings, smoteit=smote)
-      # abcd = ABCD(before=actual, after=preds)
-      # F = np.array([k.stats()[-2] for k in abcd()])
-      # Pd0 = np.array([k.stats()[0] for k in abcd()])
-      # Pf0 = np.array([k.stats()[1] for k in abcd()])
-      # # set_trace()
-      # G.append(F[0])
-      # say(', %0.2f, %0.2f\n'%(Pd0[1], 1-Pf0[1]))
-
-      # Pd.append(Pd0)
-      # Pf.append(Pf0)
-      # E0.append(G)
-      # E1.append(Pf)
-      # rdivDemo(E0)
-      # rdivDemo(E1)
     set_trace()
 
 
@@ -370,6 +349,28 @@ def parCross(indx):
     e.append(aft)
   rdivDemo(e)
 
+def validate_xtree():
+  e={
+    "Stab": [],
+    "Cons": [],
+    "Disc": []
+  }
+  for name in ['ant', 'ivy', 'jedit', 'lucene', 'poi']:
+    print("##", name)
+    train, test = explore(dir='Data/Jureczko/', name=name)
+    stab = [name]
+    disc = [name]
+    cons = [name]
+    for _ in xrange(10):
+      aft = xtree2(train, test)
+      stab.append(aft[0])
+      disc.append(aft[1])
+      # e["Cons"].extend(aft[1])
+      # e["Disc"].extend(aft[2])
+    e["Stab"].append(stab)
+    e["Disc"].append(disc)
+  rdivDemo(e["Stab"])
+  rdivDemo(e["Disc"])
 
 def parallel():
   collect=[]
@@ -383,14 +384,4 @@ def parallel():
   set_trace()
 
 if __name__=='__main__':
-  # accuracy().SVM()
-  # accuracy().RF()
-  # parallel()
-  # temporal().deltas0()
-  # temporal().deltas()
-  # cross().improve1()
-  # mccabe().improve()
-  # mccabe().acc()
-  # temporal().improve()
-  # cross().deltas()
-  parCross(1)
+  validate_xtree()

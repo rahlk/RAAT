@@ -15,9 +15,7 @@ from timeit import time
 from random import uniform
 from numpy.random import normal as randn
 from tools.tune.dEvol import tuner
-
-def trueValue(all,test):
-  set_trace()
+from collections import Counter
 
 def flatten(x):
   """
@@ -49,15 +47,15 @@ class changes():
 class patches:
 
   def __init__(i,train,test,trainDF,testDF,rfTrain,tree=None,tunings=None,config=False):
-    i.train=train
-    i.trainDF = trainDF
-    i.rftrain = rfTrain
-    i.test=test
-    i.testDF=testDF
-    i.config=config
-    i.tree=tree
-    i.change =[]
-    i.tunings = tunings#if tunings else tuner(i.rftrain)
+    i.train    = train
+    i.trainDF  = trainDF
+    i.rftrain  = rfTrain
+    i.test     = test
+    i.testDF   = testDF
+    i.config   = config
+    i.tree     = tree
+    i.change   = []
+    i.tunings  = tunings#if tunings else tuner(i.rftrain)
 
   def leaves(i, node):
     """
@@ -89,116 +87,45 @@ class patches:
         except: set_trace()
     return t
 
-  @staticmethod
-  def howfar(me, other):
-    set_trace()
-    common = [a for a in me.branch if a not in other.branch]
-    return len(me.branch)-len(common)
-
 
   def patchIt(i,testInst, config=False):
-    # 1. Find where t falls
-    C = changes() # Record changes
     testInst = pd.DataFrame(testInst).transpose()
-    current = i.find(testInst, i.tree)
-    node = current
+    node = i.find(testInst, i.tree)
+    return 1 if (np.median(node.t["$<bug"]) > 0 and testInst["$<bug"].values[0] > 0) or (np.median(node.t["$<bug"]) == testInst["$<bug"].values[0]) else 0
+    
+  def disc(i):
+    def ent(x):
+      C = Counter(x)
+      N = len(x)
+      return sum([-C[n]/N*np.log(C[n]/N) for n in C.keys()])
 
-    def howfar1(me, other):
-      # ch = []
-      # for oth in other:
-        dist=0
-        for aa, bb in zip(me.branch, other.branch):
-          dist+= 1 if aa[0]==bb[0] else 0
-        # ch.append(dist)
-        return dist
-      #
-      # set_trace()
-
-
-      # common = [a for a in me.branch if a not in other.branch]
-      # return len(me.branch)-len(common)
-
-    while node.lvl > -1:
-      node = node.up  # Move to tree root
-
-    leaves = flatten([i.leaves(_k) for _k in node.kids])
-    # try:
-    if i.config:
-      best = sorted([l for l in leaves if l.score<current.score], key=lambda F: i.howfar(current,F))[0]
-    else:
-      betters = [l for l in leaves if l.score==0]
-      best = sorted(betters, key=lambda F: howfar1(current,F))[-1]
-    # except:
-    #   return testInst.values.tolist()[0]
-    # set_trace()
-    def new(old, range):
-      rad = abs(min(range[1]-old, old-range[1]))
-      # return randn(old, rad) if rad else old
-      # return uniform(old-rad,rad+old)
-      return uniform(range[0],range[1])
-
-    # set_trace()
-    for ii in best.branch:
-      before = testInst[ii[0]]
-      if not ii in current.branch:
-        then = testInst[ii[0]].values[0]
-        now = ii[1] if i.config else new(testInst[ii[0]].values[0], ii[1])
-        # print(current.branch,best.branch)
-        testInst[ii[0]] = now
-        C.save(name=ii[0], old=then, new=now)
-
-    testInst[testInst.columns[-1]] = None
-    i.change.append(C.log)
-    # set_trace()
-    return testInst.values.tolist()[0]
+    leaves = flatten([i.leaves(_k) for _k in i.tree.kids])
+    values = [l.t["$<bug"].values.tolist() for l in leaves]
+    entrop = np.array([ent(val) for val in values])
+    max_l = np.max([len(l) for l in values])
+    wt = np.array([(len(l)-1)/(max_l-1) for l in values] )
+    return np.mean(wt*entrop)
+    
+  def stability(i, config=False, justDeltas=False):
+    newRows = [i.patchIt(i.testDF.iloc[n], config) for n in xrange(i.testDF.shape[0])]
+    return sum(newRows)/len(newRows)
 
 
-  def main(i, config=False, justDeltas=False):
-    newRows = [i.patchIt(i.testDF.iloc[n], config) for n in xrange(i.testDF.shape[0]) if i.testDF.iloc[n][-1]>0 or i.testDF.iloc[n][-1]==True]
-    newRows = pd.DataFrame(newRows, columns=i.testDF.columns)
 
-    before, after = rforest(i.rftrain, newRows, tunings=i.tunings, bin = not i.config, regress=i.config)
-    newRows[newRows.columns[-1]] = after
-    gain = (1-sum(after)/sum(i.testDF[i.testDF.columns[-1]]))*100 if i.config else (1-sum(after)/len(after))*100
-
-    if not justDeltas:
-      return gain
-    else:
-      return i.testDF.columns[:-1], i.change
 
 def xtree(train, test, rftrain=None, config=False,tunings=None, justDeltas=False):
+  
   "XTREE"
-  if config:
-    # set_trace()
-    data = csv2DF(train[1], toBin=False)
-    shuffle(data)
-    train_DF, test_DF=data[:int(len(data)/2)], data[int(len(data)/2):].reset_index(drop=True)
-    tree = pyC45.dtree2(train_DF)
-    patch = patches(train=train, test=test, trainDF=train_DF, testDF=test_DF, tree=tree, tunings=tunings, config=True)
-    return patch.main(justDeltas=justDeltas)[1]
-    # set_trace()
+  train_DF = csv2DF(train, toBin=True)
+  if not rftrain: rftrain=train
+  test_DF = csv2DF(test)
+  train_val = csv2DF(train[:-1], toBin=True)
+  test_val  = csv2DF([train[-1]], toBin=True)
+  tree = pyC45.dtree(train_DF)
+  tree_val = pyC45.dtree(train_val)
+  patch0 = patches(train=train, test=test, trainDF=train_DF, testDF=test_DF, rfTrain=rftrain, tunings=tunings, tree=tree)
+  patch1 = patches(train=train, test=test, trainDF=train_val, testDF=test_val, rfTrain=rftrain, tunings=tunings, tree=tree_val)
+  stab = np.min(patch0.stability(justDeltas=justDeltas), patch1.stability(justDeltas=justDeltas))
+  disc = patch0.disc()
 
-
-  else:
-    train_DF = csv2DF(train, toBin=True)
-    if not rftrain: rftrain=train
-    test_DF = csv2DF(test)
-    tree = pyC45.dtree(train_DF)
-
-    # ## ----- debug -----
-    # pyC45.show(tree)
-    # set_trace()
-
-    patch = patches(train=train, test=test, trainDF=train_DF, testDF=test_DF, rfTrain=rftrain, tunings=tunings, tree=tree)
-    return patch.main(justDeltas=justDeltas)
-
-if __name__ == '__main__':
-  E = []
-  for name in ['ant']:#, 'ivy', 'jedit', 'lucene', 'poi']:
-    print("##", name)
-    train, test = explore(dir='../Data/Jureczko/', name=name)
-    aft = [name]
-    for _ in xrange(10):
-      aft.append(xtree(train, test))
-    E.append(aft)
-  rdivDemo(E)
+  return stab, disc
