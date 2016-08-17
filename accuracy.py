@@ -44,7 +44,7 @@ def RF(indx):
   F = np.array([k.stats()[-2] for k in abcd()])
   Pd0 = np.array([k.stats()[0] for k in abcd()])
   Pf0 = np.array([k.stats()[1] for k in abcd()])
-  say(init+'%0.2f,\t %0.2f\n'%(Pd0[1], 1-Pf0[1]))
+  say(init + '%0.2f,\t %0.2f\n' % (Pd0[1], 1 - Pf0[1]))
   # say(init1+'%0.2f\n'%(F[1]))
   return init+'%0.2f,\t %0.2f\n'%(Pd0[1], 1-Pf0[1])
 
@@ -71,7 +71,7 @@ def SVM(indx):
     Pf0 = np.array([k.stats()[1] for k in abcd()])
     # set_trace()
     G.append(F[0])
-    say(tr[0].split('/')[-2]+', %0.2f, %0.2f\n'%(Pd0[1], 1-Pf0[1]))
+    say(tr[0].split('/')[-2] + ', %0.2f, %0.2f\n' % (Pd0[1], 1 - Pf0[1]))
 
   set_trace()
 

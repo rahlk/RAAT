@@ -203,7 +203,7 @@ def _RF():
     tC = Counter(actual)
     FreqClass=[tC[kk]/len(actual) for kk in list(set(actual))]
     ExptF = np.sum(F*FreqClass)
-    say(', %0.2f\n'%(ExptF))
+    say(', %0.2f\n' % (ExptF))
   # ---- ::DEBUG:: -----
   set_trace()
 
