@@ -19,14 +19,14 @@ from sklearn.ensemble import AdaBoostClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
-from _imports.weights import weights as W
+from Planners.XTREE.lib.weights import weights as W
 
 from Prediction import *
-# from _imports.settingsWhere import o
+# from Planners.XTREE.lib.settingsWhere import o
 from cliffsDelta import *
 from hist import *
 from smote import *
-import _imports.makeAmodel as mam
+import Planners.XTREE.lib.makeAmodel as mam
 from methods1 import *
 import numpy as np
 import pandas as pd

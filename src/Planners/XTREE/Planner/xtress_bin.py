@@ -21,9 +21,9 @@ from sklearn.tree import DecisionTreeClassifier
 
 from collections import Counter
 
-from _imports import *
+from Planners.XTREE.lib import *
 from smote import *
-import _imports.makeAmodel as mam
+import Planners.XTREE.lib.makeAmodel as mam
 from methods1 import *
 import numpy as np
 import pandas as pd

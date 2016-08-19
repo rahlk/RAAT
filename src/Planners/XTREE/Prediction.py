@@ -24,9 +24,9 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from smote import *
 import pandas as pd
-from abcd import _Abcd
+from tools.axe.abcd import _Abcd
 from methods1 import *
-from sk import rdivDemo
+from tools.sk import rdivDemo
 
 
 def formatData(tbl):

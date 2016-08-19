@@ -16,7 +16,7 @@ sys.path.extend([axe, pystat, cwd])
 from scipy.spatial.distance import euclidean
 from random import choice, seed as rseed, uniform as rand
 import pandas as pd
-from table import *
+from tools.axe.table import *
 
 
 def SMOTE(data=None, k=5, atleast=100, atmost=100, bugIndx=2, resample=False):

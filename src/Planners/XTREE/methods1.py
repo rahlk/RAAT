@@ -12,11 +12,11 @@ axe = HOME + '/git/axe/axe/'  # AXE
 pystat = HOME + '/git/pystats/'  # PySTAT
 cwd = getcwd()  # Current Directory
 sys.path.extend([axe, pystat, './where2'])
-from dtree import *
-from table import *
+from tools.axe.dtree import *
+from tools.axe.table import *
 # from w2 import *
-from _imports.w2 import where2, prepare, leaves
-from _imports.makeAmodel import makeAModel
+from lib.w2 import where2, prepare, leaves
+from lib.makeAmodel import makeAModel
 import matplotlib.mlab as mlab
 # import matplotlib.pyplot as plt
 import smote

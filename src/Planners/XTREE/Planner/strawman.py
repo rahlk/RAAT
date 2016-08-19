@@ -6,7 +6,7 @@ from os import remove as rm
 from random import randint
 from methods1 import createTbl
 from Prediction import rforest, rforest2
-from _imports.weights import weights as W
+from Planners.XTREE.lib.weights import weights as W
 from os import environ, getcwd
 from os import walk
 from os.path import expanduser
@@ -20,7 +20,7 @@ pystat = HOME + '/git/pystats/'  # PySTAT
 cwd = getcwd()  # Current Directory
 sys.path.extend([axe, pystat, cwd])
 
-from table import clone
+from tools.axe.table import clone
 import csv
 
 def avoid(name='BDBC'):

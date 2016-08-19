@@ -28,14 +28,14 @@ from sklearn.tree import DecisionTreeClassifier
 
 from collections import Counter
 
-from _imports import *
-from abcd import _Abcd
+from Planners.XTREE.lib import *
+from tools.axe.abcd import _Abcd
 from smote import *
-import _imports.makeAmodel as mam
+import Planners.XTREE.lib.makeAmodel as mam
 from methods1 import *
 import numpy as np
 import pandas as pd
-import sk
+import tools.sk
 
 
 def genTable(tbl, rows):

@@ -3,7 +3,7 @@ from lib    import *
 from demos  import *
 from table import *
 from fi     import *
-from Abcd   import *
+from abcd   import *
 from learn  import *
 from dtree  import *
 
